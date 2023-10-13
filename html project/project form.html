@@ -1,0 +1,223 @@
+
+<html>
+<head>
+    <title>Survey Form</title>
+    <style>
+        h1 {
+            text-align: center;
+            margin-top: 40px;
+            color: #333;
+            text-transform: uppercase;
+        }
+        body {
+            background-color: #3498db;
+            font-family: Arial, sans-serif;
+           
+            justify-content: center;
+            align-items: center;
+            height:100vh;
+            margin:0;
+        }
+
+        #form-container {
+            background-color: #ffffff;
+            padding:20px;
+            border-radius:10px;
+            box-shadow:0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        #survey-form {
+            max-width:400px;
+            margin:0 auto;
+        }
+
+        #survey-form label {
+            display:inline-block;
+            margin-bottom:5px;
+            font-weight: bold;
+        }
+
+        #survey-form input[type="text"],
+        #survey-form input[type="date"],
+        #survey-form input[type="email"],
+        #survey-form input[type="tel"],
+        #survey-form select {
+            width:100%;
+            padding:10px;
+            margin-bottom: 15px;
+            border:1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #survey-form label {
+            display:inline-block;
+            margin-bottom:5px;
+            font-weight:bold;
+        }
+
+        #survey-form .gender-label {
+            margin-right:10px;
+        }
+
+        #survey-form button {
+            padding:10px 20px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius:5px;
+            cursor: pointer;
+        }
+
+        #survey-form button:not(:last-child) {
+            margin-right: 10px;
+        }
+
+        #popup {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        
+    </style>
+    
+    
+</head>
+<body>
+    <h1> Customer Survey Form</h1>
+    <form id="survey-form" onsubmit="submitForm(event)">
+        <div>
+            <label for="first-name">First Name:</label>
+            <input type="text" id="first-name" required>
+        </div>
+        <div>
+            <label for="last-name">Last Name:</label>
+            <input type="text" id="last-name" required>
+        </div>
+        <div>
+            <label for="date-of-birth">Date of Birth:</label>
+            <input type="date" id="date-of-birth" max="9999-12-31" required>
+        </div>
+        <div>
+            <label for="country">Country:</label>
+            <select id="country" required>
+                <option value="">--Select a country--</option>
+                <option value="USA">USA</option>
+                <option value="Canada">Canada</option>
+                <option value="UK">United Kingdom</option>
+                <option value="India">India</option>
+                <option value="Pakisthan">Pakisthan</option>
+                <option value="Australia">Australia</option>
+                <option value="New Zealand">New Zealand</option>
+                <option value="South Africa">South Africa</option>
+                <option value="Netherlands">Netherlands</option>
+                <option value="Afghanisthan">Afghanisthan</option>
+                <option value="Nepal">Nepal</option>
+                <option value="Bangladesh">Bangladesh</option>
+                <option value="Sri Lanka">Sri Lanka</option>
+                <option value="Zimbabwe">Zimbabwe</option>
+                <option value="Oman">Oman</option>
+                <!-- Add more countries as needed -->
+            </select>
+        </div>
+        <div>
+            <label>Gender:</label>
+            <input type="checkbox" id="male" name="gender" value="male" onclick="updateCheck(this)" > <label for="male">Male</label>
+            <input type="checkbox" id="female" name="gender" value="female" onclick="updateCheck(this)" > <label for="female">Female</label>
+            <!-- Add more genders if necessary -->
+        </div>
+        <div>
+            <label for="profession">Profession:</label>
+            <input type="text" id="profession" required>
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+        </div>
+        <div>
+            <label for="mobile-number">Mobile Number:</label>
+            <input type="tel" id="mobile-number" pattern="[0-9]{10}" required>
+        </div>
+        <div class="button-container">
+            <button type="button" onclick="resetForm()" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 4px; margin-right: 10px; font-size: 16px;">Reset</button>
+            <button type="submit" style="padding:10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 4px; font-size: 16px;">Submit</button>
+        </div>
+    </form>
+
+    <div id="popup" style="display: none;">
+        <h2>Form Submission</h2>
+        <p id="popup-content"></p>
+        <button onclick="closePopup()">Close</button>
+    </div>
+
+    <script>
+        function updateCheck(currentCheckbox) {
+            const checkboxes = document.querySelectorAll('input[name="gender"]');
+            checkboxes.forEach((checkbox) => {
+                if (checkbox !== currentCheckbox) {
+                    checkbox.checked = false;
+                }
+            });
+        }
+
+        function submitForm(event) {
+            event.preventDefault();
+            const firstName = document.getElementById("first-name").value;
+            const lastName = document.getElementById("last-name").value;
+            const dateOfBirth = document.getElementById("date-of-birth").value;
+            const country = document.getElementById("country").value;
+            const gender = document.querySelector('input[name="gender"]:checked');
+            const profession = document.getElementById("profession").value;
+            const email = document.getElementById("email").value;
+            const mobileNumber = document.getElementById("mobile-number").value;
+
+            if (!firstName || !lastName || !dateOfBirth || country === "" || !gender || !profession || !validateEmail(email) || !validateMobileNumber(mobileNumber)) {
+                alert("Please fill in all the required fields correctly.");
+                return;
+            }
+
+            const genderValue = gender.value;
+
+            const popupContent = `
+            <p>First Name: ${firstName}</p>
+            <p>Last Name: ${lastName}</p>
+            <p>Date of Birth: ${dateOfBirth}</p>
+            <p>Country: ${country}</p>
+            <p>Gender: ${genderValue}</p>
+            <p>Profession: ${profession}</p>
+            <p>Email: ${email}</p>
+            <p>Mobile Number: ${mobileNumber}</p>
+        `;
+
+        document.getElementById("popup-content").innerHTML = popupContent;
+            document.getElementById("popup").style.display = "block";
+        }
+
+        function resetForm() {
+            document.getElementById("survey-form").reset();
+        }
+
+        function closePopup() {
+            document.getElementById("popup").style.display = "none";
+            document.getElementById("survey-form").reset();
+        }
+
+        function validateEmail(email) {
+            const re = /\S+@\S+\.\S+/;
+            return re.test(email);
+        }
+
+        function validateMobileNumber(number) {
+            const re = /^[0-9]{10}$/;
+            return re.test(number);
+        }
+    </script>
+</body>
+
+</html>

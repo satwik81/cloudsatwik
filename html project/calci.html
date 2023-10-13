@@ -1,0 +1,54 @@
+<html>
+
+    <style>
+        /* CSS styles */
+        #myTextbox {
+            width: 300px;
+            height: 85px;
+            padding: 5px;
+            border: none;
+            font-size:xx-large;
+        }
+        button[name="mybutton"] {
+           
+          
+            background-color:rgb(0, 0, 0);
+             width: 100px;
+              height: 100px;
+              color:rgb(255, 255, 255);
+               border:none;
+
+        }
+        button[name=mybutton2]{
+            background-color:rgb(77, 81, 77);
+             width: 100px; 
+             height: 100px;
+             color:white;
+             border:none;
+
+        }
+    </style>
+<!--code for functionality javascript code-->
+    <script>
+        function displayButtonId(buttonId) {
+          
+            document.getElementById('myTextbox').value += buttonId;
+        }
+        function evaluateexpression(buttonId){
+            var s=document.getElementById('myTextbox').value;
+            document.getElementById('myTextbox').value=eval(s);
+        }
+        function allclearbutton(){
+            document.getElementById('myTextbox').value='';
+        }
+    </script>
+    <body>
+        <center>
+        <input type="text" id="myTextbox" name="myTextbox"><button  id="0" style="background-color:rgb(1, 153, 97); width: 100px; height: 100px;color:white; border:none;" onclick="allclearbutton(this.id)" >AC</button><br>
+        <button id='9' name="mybutton"  onclick="displayButtonId(this.id)">9</button><button id='8' name="mybutton"  onclick="displayButtonId(this.id)">8</button><button  id='7' name="mybutton"  onclick="displayButtonId(this.id)">7</button><button id='+' name="mybutton2" onclick="displayButtonId(this.id)">+</button><br>
+        <button  id='4' name="mybutton"  onclick="displayButtonId(this.id)">4</button><button id='5' name="mybutton"  onclick="displayButtonId(this.id)">5</button><button  id='6' name="mybutton"  onclick="displayButtonId(this.id)">6</button><button id='-' name="mybutton2"   onclick="displayButtonId(this.id)">-</button><br>
+        <button id='1' name="mybutton"  onclick="displayButtonId(this.id)">1</button><button id='2' name="mybutton"  onclick="displayButtonId(this.id)">2</button><button  id='3' name="mybutton"  onclick="displayButtonId(this.id)">3</button><button id='/' name="mybutton2"    onclick="displayButtonId(this.id)">/</button><br>
+        <button id='.' name="mybutton"  onclick="displayButtonId(this.id)">.</button><button id='0' name="mybutton"  onclick="displayButtonId(this.id)">0</button><button id='=' name="mybutton"   onclick="evaluateexpression(this.id)">=</button><button id='*' name="mybutton2"   onclick="displayButtonId(this.id)">X</button><br><br>
+    </center>
+    </body>
+</html>
