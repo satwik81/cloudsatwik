@@ -1,9 +1,9 @@
-name,last_name,gender,email,city,state,zip_code
-Cali,Rolfson,Female,Colrolf@examle.com,"Rancho Santa Fe",California,99032
-Morton,Johnson,Male,"Morton4597 @examle.com","Solana Beach",California,99242
-Sim,Welch,Male,s.w2709@examle.com,"San Diego",California,92367
-Sim,Welch,Male,s.w2709@examle.com,"San Diego",California,92367
-Morton,Johnson,Male,"oo : :","_ Solana Beach",California,99242
-Morton,Johnson,Male,"Morton4597 @examle.com","Solana Beach",California,99242
-Cali,Rolfson,Female,Colrolf@examle.com,"Rancho Santa Fe",California,99032
-Sim,Welch,Male,s.w2709@examle.com,"San Diego |",California,92367
+name,last_name,gender,email,city,state,zip_code,age 
+Cali,Rolfson,Female,Colrolf@examle.com,"Rancho Santa Fe",California,99032,22
+Morton,Johnson,Male,"Morton4597 @examle.com","Solana Beach",California,99242,24
+Sim,Welch,Male,s.w2709@examle.com,"San Diego",California,92367,44
+Sim,Welch,Male,s.w2709@examle.com,"San Diego",California,92367,56
+Morton,Johnson,Male,"oo : :","_ Solana Beach",California,99242,35
+Morton,Johnson,Male,"Morton4597 @examle.com","Solana Beach",California,99242,40
+Cali,Rolfson,Female,Colrolf@examle.com,"Rancho Santa Fe",California,99032,25
+Sim,Welch,Male,s.w2709@examle.com,"San Diego |",California,92367,20
