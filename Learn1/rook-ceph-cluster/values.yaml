@@ -142,16 +142,16 @@ cephClusterSpec:
   mon:
     # Set the number of mons to be started. Generally recommended to be 3.
     # For highest availability, an odd number of mons should be specified.
-    count: 3
+    count: 1
     # The mons should be on unique nodes. For production, at least 3 nodes are recommended for this reason.
     # Mons should only be allowed on the same node for test environments where data loss is acceptable.
-    allowMultiplePerNode: false
+    allowMultiplePerNode: true
 
   mgr:
     # When higher availability of the mgr is needed, increase the count to 2.
     # In that case, one mgr will be active and one in standby. When Ceph updates which
     # mgr is active, Rook will update the mgr services to match the active mgr.
-    count: 2
+    count: 1
     allowMultiplePerNode: false
     modules:
       # List of modules to optionally enable or disable.
@@ -312,10 +312,10 @@ cephClusterSpec:
         memory: "1Gi"
     osd:
       limits:
-        memory: "4Gi"
+        memory: "2Gi"
       requests:
         cpu: "1000m"
-        memory: "4Gi"
+        memory: "1Gi"
     prepareosd:
       # limits: It is not recommended to set limits on the OSD prepare job
       #         since it's a one-time burst for memory that must be allowed to
@@ -534,10 +534,10 @@ cephFileSystems:
         activeStandby: true
         resources:
           limits:
-            memory: "4Gi"
+            memory: "2Gi"
           requests:
             cpu: "1000m"
-            memory: "4Gi"
+            memory: "2Gi"
         priorityClassName: system-cluster-critical
     storageClass:
       enabled: true
