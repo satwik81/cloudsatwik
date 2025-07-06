@@ -42,7 +42,7 @@ toolbox:
   # -- Toolbox resources
   resources:
     limits:
-      memory: "1Gi"
+      memory: "50Mi"
     requests:
       cpu: "100m"
       memory: "128Mi"
@@ -300,7 +300,7 @@ cephClusterSpec:
   resources:
     mgr:
       limits:
-        memory: "1Gi"
+        memory: "50Mi"
       requests:
         cpu: "500m"
         memory: "512Mi"
@@ -309,13 +309,13 @@ cephClusterSpec:
         memory: "2Gi"
       requests:
         cpu: "1000m"
-        memory: "1Gi"
+        memory: "50Mi"
     osd:
       limits:
         memory: "2Gi"
       requests:
         cpu: "1000m"
-        memory: "1Gi"
+        memory: "50Mi"
     prepareosd:
       # limits: It is not recommended to set limits on the OSD prepare job
       #         since it's a one-time burst for memory that must be allowed to
@@ -342,13 +342,13 @@ cephClusterSpec:
         memory: "60Mi"
     logcollector:
       limits:
-        memory: "1Gi"
+        memory: "50Mi"
       requests:
         cpu: "100m"
         memory: "100Mi"
     cleanup:
       limits:
-        memory: "1Gi"
+        memory: "50Mi"
       requests:
         cpu: "500m"
         memory: "100Mi"
@@ -614,7 +614,7 @@ cephObjectStores:
             memory: "2Gi"
           requests:
             cpu: "1000m"
-            memory: "1Gi"
+            memory: "50Mi"
         # securePort: 443
         # sslCertificateRef:
         instances: 1
