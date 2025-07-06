@@ -140,7 +140,7 @@ csi:
   enableMetadata: false
 
   # -- Set replicas for csi provisioner deployment
-  provisionerReplicas: 2
+  provisionerReplicas: 1
 
   # -- Cluster name identifier to set as metadata on the CephFS subvolume and RBD images. This will be useful
   # in cases like for example, when two container orchestrator clusters (Kubernetes/OCP) are using a single ceph cluster
