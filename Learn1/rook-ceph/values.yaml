@@ -23,7 +23,7 @@ crds:
 # -- Pod resource requests & limits
 resources:
   limits:
-    memory: 512Mi
+    memory: 128Mi
   requests:
     cpu: 200m
     memory: 128Mi
@@ -225,44 +225,44 @@ csi:
     - name : csi-provisioner
       resource:
         requests:
-          memory: 128Mi
-          cpu: 100m
+          memory: 64Mi
+          cpu: 25m
         limits:
-          memory: 256Mi
+          memory: 64Mi
     - name : csi-resizer
       resource:
         requests:
-          memory: 128Mi
-          cpu: 100m
+          memory: 64Mi
+          cpu: 50m
         limits:
-          memory: 256Mi
+          memory: 128Mi
     - name : csi-attacher
       resource:
         requests:
-          memory: 128Mi
-          cpu: 100m
+          memory: 64Mi
+          cpu: 50m
         limits:
-          memory: 256Mi
+          memory: 128Mi
     - name : csi-snapshotter
       resource:
         requests:
-          memory: 128Mi
-          cpu: 100m
+          memory: 64Mi
+          cpu: 50m
         limits:
           memory: 256Mi
     - name : csi-rbdplugin
       resource:
         requests:
-          memory: 512Mi
+          memory: 128Mi
         limits:
-          memory: 1Gi
+          memory: 256Mi
     - name : csi-omap-generator
       resource:
         requests:
-          memory: 512Mi
-          cpu: 250m
+          memory: 128Mi
+          cpu: 150m
         limits:
-          memory: 1Gi
+          memory: 256Mi
     - name : liveness-prometheus
       resource:
         requests:
@@ -284,10 +284,10 @@ csi:
     - name : csi-rbdplugin
       resource:
         requests:
-          memory: 512Mi
+          memory: 128Mi
           cpu: 250m
         limits:
-          memory: 1Gi
+          memory: 256Mi
     - name : liveness-prometheus
       resource:
         requests:
@@ -303,37 +303,37 @@ csi:
       resource:
         requests:
           memory: 128Mi
-          cpu: 100m
+          cpu: 50m
         limits:
           memory: 256Mi
     - name : csi-resizer
       resource:
         requests:
           memory: 128Mi
-          cpu: 100m
+          cpu: 50m
         limits:
           memory: 256Mi
     - name : csi-attacher
       resource:
         requests:
           memory: 128Mi
-          cpu: 100m
+          cpu: 50m
         limits:
           memory: 256Mi
     - name : csi-snapshotter
       resource:
         requests:
           memory: 128Mi
-          cpu: 100m
+          cpu: 50m
         limits:
           memory: 256Mi
     - name : csi-cephfsplugin
       resource:
         requests:
-          memory: 512Mi
+          memory: 128Mi
           cpu: 250m
         limits:
-          memory: 1Gi
+          memory: 256Mi
     - name : liveness-prometheus
       resource:
         requests:
@@ -355,10 +355,10 @@ csi:
     - name : csi-cephfsplugin
       resource:
         requests:
-          memory: 512Mi
+          memory: 128Mi
           cpu: 250m
         limits:
-          memory: 1Gi
+          memory: 256Mi
     - name : liveness-prometheus
       resource:
         requests:
@@ -374,23 +374,23 @@ csi:
       resource:
         requests:
           memory: 128Mi
-          cpu: 100m
+          cpu: 50m
         limits:
           memory: 256Mi
     - name : csi-nfsplugin
       resource:
         requests:
-          memory: 512Mi
+          memory: 128Mi
           cpu: 250m
         limits:
-          memory: 1Gi
+          memory: 256Mi
     - name : csi-attacher
       resource:
         requests:
-          memory: 512Mi
+          memory: 128Mi
           cpu: 250m
         limits:
-          memory: 1Gi
+          memory: 256Mi
 
   # -- CEPH CSI NFS plugin resource requirement list
   # @default -- see values.yaml
@@ -405,10 +405,10 @@ csi:
     - name : csi-nfsplugin
       resource:
         requests:
-          memory: 512Mi
+          memory: 128Mi
           cpu: 250m
         limits:
-          memory: 1Gi
+          memory: 256Mi
 
   # Set provisionerTolerations and provisionerNodeAffinity for provisioner pod.
   # The CSI provisioner would be best to start on the same nodes as other ceph daemons.
@@ -627,9 +627,9 @@ discover:
   # -- Add resources to discover daemon pods
   resources:
   #   - limits:
-  #       memory: 512Mi
+  #       memory: 128Mi
   #   - requests:
-  #       cpu: 100m
+  #       cpu: 50m
   #       memory: 128Mi
 
 # -- Custom label to identify node hostname. If not set `kubernetes.io/hostname` will be used
