@@ -1014,7 +1014,7 @@ vmstorage:
     # -- Data root path. Vmstorage data Persistent Volume mount root path
     mountPath: /storage
     # -- Size of the volume.
-    size: 2Gi
+    size: 128Mi
     # -- Mount subpath
     subPath: ""
 
