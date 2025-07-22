@@ -1,0 +1,101 @@
+data_sources:
+  - name: "cpu_usage"
+    type: "system_metric"
+    source: "psutil.cpu_percent"
+    interval: 5  # seconds
+    enabled: true
+    
+  - name: "memory_usage"
+    type: "system_metric"
+    source: "psutil.virtual_memory"
+    interval: 10
+    enabled: true
+    
+  - name: "disk_usage"
+    type: "system_metric"
+    source: "psutil.disk_usage"
+    interval: 30
+    path: "/"
+    enabled: true
+    
+  - name: "network_io"
+    type: "system_metric"
+    source: "psutil.net_io_counters"
+    interval: 15
+    enabled: true
+    
+  - name: "custom_api"
+    type: "api_endpoint"
+    source: "http://localhost:8080/metrics"
+    interval: 20
+    enabled: false
+
+threshold_rules:
+  - data_source: "cpu_usage"
+    metric_name: "cpu_percent"
+    threshold_type: "greater_than"
+    threshold_value: 80.0
+    consecutive_violations: 2
+    enabled: true
+    
+  - data_source: "memory_usage"
+    metric_name: "memory_percent"
+    threshold_type: "greater_than"
+    threshold_value: 85.0
+    consecutive_violations: 1
+    enabled: true
+    
+  - data_source: "disk_usage"
+    metric_name: "disk_percent"
+    threshold_type: "greater_than"
+    threshold_value: 90.0
+    consecutive_violations: 1
+    enabled: true
+    
+  - data_source: "network_io"
+    metric_name: "bytes_sent_per_sec"
+    threshold_type: "greater_than"
+    threshold_value: 1000000  # 1MB/s
+    consecutive_violations: 3
+    enabled: true
+
+export_settings:
+  enabled: true
+  export_formats:
+    - "json"
+    - "csv"
+  export_directory: "./exports"
+  max_export_files: 100
+  compress_exports: true
+  
+  # Export destinations
+  destinations:
+    - type: "file"
+      enabled: true
+      
+    - type: "webhook"
+      enabled: false
+      url: "http://localhost:8081/webhook"
+      headers:
+        "Content-Type": "application/json"
+        "Authorization": "Bearer your-token-here"
+    
+    - type: "email"
+      enabled: false
+      smtp_server: "smtp.gmail.com"
+      smtp_port: 587
+      username: "your-email@gmail.com"
+      password: "your-app-password"
+      to_addresses:
+        - "admin@company.com"
+
+logging:
+  level: "INFO"
+  file: "./logs/monitor.log"
+  max_size_mb: 10
+  backup_count: 5
+  
+monitoring:
+  max_workers: 4
+  check_interval: 1  # seconds
+  data_retention_hours: 24
