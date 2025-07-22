@@ -2,8 +2,8 @@ import requests
 import yaml
 import json
 import time
-import mysql.connector
-from mysql.connector import Error
+import pymysql
+from pymysql import MySQLError
 
 # Load configuration from YAML
 def load_config(config_file='config.yaml'):
@@ -53,12 +53,19 @@ def process_and_check_threshold(metrics_data, metric_config):
                     })
     return results
 
-# Export data to MySQL database
+# Export data to MySQL database using PyMySQL
 def export_data_to_mysql(records, mysql_config):
     try:
-        connection = mysql.connector.connect(**mysql_config)
+        # Connect to MySQL
+        connection = pymysql.connect(
+            host=mysql_config['host'],
+            user=mysql_config['user'],
+            password=mysql_config['password'],
+            database=mysql_config['database']
+        )
         cursor = connection.cursor()
 
+        # Prepare SQL query to insert the records
         for record in records:
             timestamp = record.get('timestamp', time.time())  # Use current timestamp if not provided
             value = record['value']
@@ -72,10 +79,10 @@ def export_data_to_mysql(records, mysql_config):
         
         connection.commit()
         print(f"{len(records)} records exported to MySQL.")
-    except Error as e:
+    except MySQLError as e:
         print(f"Error exporting data to MySQL: {e}")
     finally:
-        if connection.is_connected():
+        if connection.open:
             cursor.close()
             connection.close()
 
@@ -118,9 +125,8 @@ def main():
             elif export_config['datastore'] == 'file':
                 export_data_to_file(all_records_to_export, export_config['file']['path'])
 
-        # Wait for the next
+        # Wait for the next poll (e.g., 60 seconds)
         time.sleep(60)
 
 if __name__ == "__main__":
     main()
-    
