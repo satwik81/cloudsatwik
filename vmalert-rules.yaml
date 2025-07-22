@@ -1,0 +1,226 @@
+groups:
+  - name: cpu_usage_rules
+    interval: 30s
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 2m
+        labels:
+          severity: warning
+          service: node_exporter
+          export_to_datastore: "true"
+        annotations:
+          summary: "High CPU usage detected on {{ $labels.instance }}"
+          description: "CPU usage is above 80% for more than 2 minutes on {{ $labels.instance }}. Current value: {{ $value }}%"
+          export_query: 'avg by(instance) (100 - (irate(node_cpu_seconds_total{mode="idle"}[5m]) * 100))'
+          export_datastore: "influxdb"
+          export_database: "alerts_db"
+          export_measurement: "cpu_alerts"
+
+      - alert: CriticalCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+        for: 1m
+        labels:
+          severity: critical
+          service: node_exporter
+          export_to_datastore: "true"
+        annotations:
+          summary: "Critical CPU usage detected on {{ $labels.instance }}"
+          description: "CPU usage is above 95% for more than 1 minute on {{ $labels.instance }}. Current value: {{ $value }}%"
+          export_query: 'avg by(instance) (100 - (irate(node_cpu_seconds_total{mode="idle"}[5m]) * 100))'
+          export_datastore: "influxdb"
+          export_database: "alerts_db"
+          export_measurement: "cpu_critical_alerts"
+
+  - name: memory_usage_rules
+    interval: 30s
+    rules:
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: node_exporter
+          export_to_datastore: "true"
+        annotations:
+          summary: "High memory usage detected on {{ $labels.instance }}"
+          description: "Memory usage is above 85% for more than 5 minutes on {{ $labels.instance }}. Current value: {{ $value }}%"
+          export_query: '(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100'
+          export_datastore: "influxdb"
+          export_database: "alerts_db"
+          export_measurement: "memory_alerts"
+
+      - alert: CriticalMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+          service: node_exporter
+          export_to_datastore: "true"
+        annotations:
+          summary: "Critical memory usage detected on {{ $labels.instance }}"
+          description: "Memory usage is above 95% for more than 2 minutes on {{ $labels.instance }}. Current value: {{ $value }}%"
+          export_query: '(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100'
+          export_datastore: "influxdb"
+          export_database: "alerts_db"
+          export_measurement: "memory_critical_alerts"
+
+  - name: disk_usage_rules
+    interval: 60s
+    rules:
+      - alert: HighDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: node_exporter
+          export_to_datastore: "true"
+        annotations:
+          summary: "High disk usage detected on {{ $labels.instance }}"
+          description: "Disk usage is above 80% for more than 5 minutes on {{ $labels.instance }} at {{ $labels.mountpoint }}. Current value: {{ $value }}%"
+          export_query: '(1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100'
+          export_datastore: "influxdb"
+          export_database: "alerts_db"
+          export_measurement: "disk_alerts"
+
+      - alert: CriticalDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+          service: node_exporter
+          export_to_datastore: "true"
+        annotations:
+          summary: "Critical disk usage detected on {{ $labels.instance }}"
+          description: "Disk usage is above 95% for more than 2 minutes on {{ $labels.instance }} at {{ $labels.mountpoint }}. Current value: {{ $value }}%"
+          export_query: '(1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100'
+          export_datastore: "influxdb"
+          export_database: "alerts_db"
+          export_measurement: "disk_critical_alerts"
+
+  - name: network_rules
+    interval: 30s
+    rules:
+      - alert: HighNetworkTraffic
+        expr: rate(node_network_receive_bytes_total{device!="lo"}[5m]) * 8 > 100 * 1024 * 1024
+        for: 3m
+        labels:
+          severity: warning
+          service: node_exporter
+          export_to_datastore: "true"
+        annotations:
+          summary: "High network traffic detected on {{ $labels.instance }}"
+          description: "Network receive traffic is above 100 Mbps for more than 3 minutes on {{ $labels.instance }} device {{ $labels.device }}. Current value: {{ $value }} bps"
+          export_query: 'rate(node_network_receive_bytes_total{device!="lo"}[5m]) * 8'
+          export_datastore: "influxdb"
+          export_database: "alerts_db"
+          export_measurement: "network_alerts"
+
+  - name: application_rules
+    interval: 30s
+    rules:
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+          service: application
+          export_to_datastore: "true"
+        annotations:
+          summary: "High response time detected for {{ $labels.job }}"
+          description: "95th percentile response time is above 500ms for more than 2 minutes. Current value: {{ $value }}s"
+          export_query: 'histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))'
+          export_datastore: "influxdb"
+          export_database: "alerts_db"
+          export_measurement: "response_time_alerts"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: application
+          export_to_datastore: "true"
+        annotations:
+          summary: "High error rate detected for {{ $labels.job }}"
+          description: "Error rate is above 5% for more than 2 minutes. Current value: {{ $value }}%"
+          export_query: 'rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100'
+          export_datastore: "influxdb"
+          export_database: "alerts_db"
+          export_measurement: "error_rate_alerts"
+
+  - name: custom_export_rules
+    interval: 60s
+    rules:
+      - record: node_cpu_usage_percent
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+        labels:
+          export_to_datastore: "true"
+        annotations:
+          export_query: '100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)'
+          export_datastore: "influxdb"
+          export_database: "metrics_db"
+          export_measurement: "cpu_usage"
+          export_interval: "60s"
+
+      - record: node_memory_usage_percent
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
+        labels:
+          export_to_datastore: "true"
+        annotations:
+          export_query: '(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100'
+          export_datastore: "influxdb"
+          export_database: "metrics_db"
+          export_measurement: "memory_usage"
+          export_interval: "60s"
+
+      - record: node_disk_usage_percent
+        expr: (1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100
+        labels:
+          export_to_datastore: "true"
+        annotations:
+          export_query: '(1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100'
+          export_datastore: "influxdb"
+          export_database: "metrics_db"
+          export_measurement: "disk_usage"
+          export_interval: "60s"
+
+# Recording rules for data export when thresholds are met
+  - name: threshold_export_rules
+    interval: 30s
+    rules:
+      - record: high_cpu_threshold_data
+        expr: (100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80) * on(instance) group_left() (100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100))
+        labels:
+          export_to_datastore: "true"
+          threshold_type: "cpu_high"
+        annotations:
+          export_datastore: "influxdb"
+          export_database: "threshold_data"
+          export_measurement: "cpu_threshold_breaches"
+          threshold_value: "80"
+          metric_type: "cpu_usage"
+
+      - record: high_memory_threshold_data
+        expr: ((1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85) * on(instance) group_left() ((1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100)
+        labels:
+          export_to_datastore: "true"
+          threshold_type: "memory_high"
+        annotations:
+          export_datastore: "influxdb"
+          export_database: "threshold_data"
+          export_measurement: "memory_threshold_breaches"
+          threshold_value: "85"
+          metric_type: "memory_usage"
+
+      - record: high_disk_threshold_data
+        expr: ((1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100 > 80) * on(instance) group_left() ((1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100)
+        labels:
+          export_to_datastore: "true"
+          threshold_type: "disk_high"
+        annotations:
+          export_datastore: "influxdb"
+          export_database: "threshold_data"
+          export_measurement: "disk_threshold_breaches"
+          threshold_value: "80"
+          metric_type: "disk_usage"
