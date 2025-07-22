@@ -1,199 +1,105 @@
-# Data source configuration (Multiple vmselects)
-datasources:
-  - name: "vmselect-instance-1"
-    url: "http://victoria-metrics-cluster-vmselect.default.svc/api/v1/query"
-    query: '(vm_memory_usage_bytes / vm_memory_total_bytes) * 100'
-  - name: "vmselect-instance-2"
-    url: "http://vmselect-instance-2-url/api/v1/query"
-    query: 'your_query_2_here'
-
-# Rules (Metric thresholds and actions)
 rules:
-  # PV Metrics
-  - name: "pv_capacity"
-    description: "Total capacity of the Persistent Volume"
-    query: "pv_capacity_query_here"  # Replace with actual query
-    threshold: 100000000000  # 100GB
+  # Example for CPU Utilization
+  - name: "cpu_utilization"
+    description: "CPU utilization of the VM"
+    query: "100 - avg(rate(vm_cpu_seconds_total{mode='idle'}[5m])) by (instance) * 100"
+    threshold: 90
     condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-  
-  - name: "pv_allocated"
-    description: "Amount of space allocated on the Persistent Volume"
-    query: "pv_allocated_query_here"  # Replace with actual query
-    threshold: 80000000000  # 80GB
-    condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-  
-  - name: "pv_utilization"
-    description: "Percentage of utilized capacity of the Persistent Volume"
-    query: "pv_utilization_query_here"
-    threshold: 80  # 80% utilization
-    condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-  
-  - name: "pv_status"
-    description: "Status of Persistent Volume"
-    query: "pv_status_query_here"
-    threshold: 1  # Example threshold for "Failed" status
-    condition: "="
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
+    datasource:
+      name: "vmselect-instance-1"
+      url: "http://vmselect-instance-1-url/api/v1/query"
+      query: "vm_cpu_seconds_total{mode='idle'}"
+    export:
+      datastore: "mysql"
+      mysql:
+        host: "localhost"
+        database: "metrics_database"
+        user: "root"
+        password: "password"
+      action: "export"
 
-  # PVC Metrics
-  - name: "pvc_capacity"
-    description: "Total capacity of the Persistent Volume Claim"
-    query: "pvc_capacity_query_here"
-    threshold: 5000000000  # 5GB
+  # Example for Memory Usage
+  - name: "memory_usage"
+    description: "Memory usage of the VM"
+    query: "(vm_memory_usage_bytes / vm_memory_total_bytes) * 100"
+    threshold: 85
     condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-  
-  - name: "pvc_allocated"
-    description: "Amount of space allocated to the PVC"
-    query: "pvc_allocated_query_here"
-    threshold: 4000000000  # 4GB
-    condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-  
-  - name: "pvc_utilization"
-    description: "Percentage of utilized capacity of the PVC"
-    query: "pvc_utilization_query_here"
-    threshold: 80  # 80% utilization
-    condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
+    datasource:
+      name: "vmselect-instance-2"
+      url: "http://vmselect-instance-2-url/api/v1/query"
+      query: "vm_memory_usage_bytes"
+    export:
+      datastore: "file"
+      file:
+        path: "memory_usage_export.json"
+      action: "export"
 
-  - name: "pvc_status"
-    description: "Status of Persistent Volume Claim"
-    query: "pvc_status_query_here"
-    threshold: 1  # Example threshold for "Failed" status
-    condition: "="
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-
-  - name: "pvc_count"
-    description: "Number of PVCs in the system"
-    query: "pvc_count_query_here"
-    threshold: 10
+  # Example for Disk Usage
+  - name: "disk_usage"
+    description: "Disk usage of the VM"
+    query: "(vm_filesystem_size_bytes{device='/dev/sda'} - vm_filesystem_free_bytes{device='/dev/sda'}) / vm_filesystem_size_bytes{device='/dev/sda'} * 100"
+    threshold: 80
     condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
+    datasource:
+      name: "vmselect-instance-1"
+      url: "http://vmselect-instance-1-url/api/v1/query"
+      query: "vm_filesystem_size_bytes{device='/dev/sda'}"
+    export:
+      datastore: "mysql"
+      mysql:
+        host: "localhost"
+        database: "metrics_database"
+        user: "root"
+        password: "password"
+      action: "export"
 
-  # I/O Metrics for Volumes
-  - name: "pv_read_ops"
-    description: "Total read operations on Persistent Volumes"
-    query: "pv_read_ops_query_here"
-    threshold: 100000
+  # Example for Network Traffic Received
+  - name: "network_traffic_received"
+    description: "Network traffic received by the VM"
+    query: "rate(vm_network_receive_bytes_total{device='eth0'}[5m])"
+    threshold: 1000000000  # 1GB per 5 minutes
     condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
+    datasource:
+      name: "vmselect-instance-2"
+      url: "http://vmselect-instance-2-url/api/v1/query"
+      query: "vm_network_receive_bytes_total{device='eth0'}"
+    export:
+      datastore: "file"
+      file:
+        path: "network_received_export.json"
+      action: "export"
 
-  - name: "pv_write_ops"
-    description: "Total write operations on Persistent Volumes"
-    query: "pv_write_ops_query_here"
-    threshold: 100000
+  # Example for Disk I/O Time
+  - name: "disk_io_time"
+    description: "Disk I/O time for the VM"
+    query: "rate(vm_disk_io_time_seconds_total{device='sda'}[5m])"
+    threshold: 1.0
     condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-
-  - name: "pvc_read_ops"
-    description: "Total read operations on PVCs"
-    query: "pvc_read_ops_query_here"
-    threshold: 50000
+    datasource:
+      name: "vmselect-instance-1"
+      url: "http://vmselect-instance-1-url/api/v1/query"
+      query: "vm_disk_io_time_seconds_total{device='sda'}"
+    export:
+      datastore: "mysql"
+      mysql:
+        host: "localhost"
+        database: "metrics_database"
+        user: "root"
+        password: "password"
+      action: "export"
+    
+  # Example for Swap Usage
+  - name: "swap_usage"
+    description: "Swap usage of the VM"
+    query: "(vm_memory_swap_usage_bytes / vm_memory_swap_total_bytes) * 100"
+    threshold: 50
     condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-
-  - name: "pvc_write_ops"
-    description: "Total write operations on PVCs"
-    query: "pvc_write_ops_query_here"
-    threshold: 50000
-    condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-
-  # Latency Metrics
-  - name: "pv_latency_read"
-    description: "Read latency on Persistent Volumes"
-    query: "pv_latency_read_query_here"
-    threshold: 100  # ms
-    condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-
-  - name: "pv_latency_write"
-    description: "Write latency on Persistent Volumes"
-    query: "pv_latency_write_query_here"
-    threshold: 100  # ms
-    condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-
-  - name: "pvc_latency_read"
-    description: "Read latency on Persistent Volume Claims"
-    query: "pvc_latency_read_query_here"
-    threshold: 100  # ms
-    condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-
-  - name: "pvc_latency_write"
-    description: "Write latency on Persistent Volume Claims"
-    query: "pvc_latency_write_query_here"
-    threshold: 100  # ms
-    condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-
-  # Persistent Volume Claim to PV capacity ratio
-  - name: "pvc_capacity_ratio"
-    description: "Ratio of PVC capacity to PV capacity"
-    query: "pvc_capacity_ratio_query_here"
-    threshold: 0.8  # 80% ratio
-    condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-
-  # Example for volume size of StatefulSets (if applicable)
-  - name: "statefulset_pvc_usage"
-    description: "PVC usage in StatefulSets"
-    query: "statefulset_pvc_usage_query_here"
-    threshold: 85  # 85% usage
-    condition: ">"
-    export_to: "mysql"
-    datastore: "mysql"  # Options: mysql, file
-    action: "export"
-
-# Datastore export configuration
-export:
-  # Choose the type of datastore (MySQL or file)
-  datastore: "mysql"  # Options: mysql, file
-  mysql:
-    host: "localhost"
-    database: "metrics_database"
-    user: "username"
-    password: "password"
-  file:
-    path: "exported_metrics.json"  # Path to store data as a JSON file
+    datasource:
+      name: "vmselect-instance-1"
+      url: "http://vmselect-instance-1-url/api/v1/query"
+      query: "vm_memory_swap_usage_bytes"
+    export:
+      datastore: "file"
+      file:
+        path: "swap_usage_export.json"
+      action: "export"
