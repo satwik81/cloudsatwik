@@ -1,5 +1,6 @@
+# Configuration file with rules, datasources, and export options
+
 rules:
-  # Example for CPU Utilization
   - name: "cpu_utilization"
     description: "CPU utilization of the VM"
     query: "100 - avg(rate(vm_cpu_seconds_total{mode='idle'}[5m])) by (instance) * 100"
@@ -8,7 +9,6 @@ rules:
     datasource:
       name: "vmselect-instance-1"
       url: "http://vmselect-instance-1-url/api/v1/query"
-      query: "vm_cpu_seconds_total{mode='idle'}"
     export:
       datastore: "mysql"
       mysql:
@@ -18,7 +18,6 @@ rules:
         password: "password"
       action: "export"
 
-  # Example for Memory Usage
   - name: "memory_usage"
     description: "Memory usage of the VM"
     query: "(vm_memory_usage_bytes / vm_memory_total_bytes) * 100"
@@ -27,23 +26,20 @@ rules:
     datasource:
       name: "vmselect-instance-2"
       url: "http://vmselect-instance-2-url/api/v1/query"
-      query: "vm_memory_usage_bytes"
     export:
       datastore: "file"
       file:
         path: "memory_usage_export.json"
       action: "export"
 
-  # Example for Disk Usage
   - name: "disk_usage"
     description: "Disk usage of the VM"
-    query: "(vm_filesystem_size_bytes{device='/dev/sda'} - vm_filesystem_free_bytes{device='/dev/sda'}) / vm_filesystem_size_bytes{device='/dev/sda'} * 100"
-    threshold: 80
+    query: "avg(rate(vm_disk_io_time_seconds_total{device='sda'}[5m])) by (instance)"
+    threshold: 75
     condition: ">"
     datasource:
       name: "vmselect-instance-1"
       url: "http://vmselect-instance-1-url/api/v1/query"
-      query: "vm_filesystem_size_bytes{device='/dev/sda'}"
     export:
       datastore: "mysql"
       mysql:
@@ -53,32 +49,28 @@ rules:
         password: "password"
       action: "export"
 
-  # Example for Network Traffic Received
-  - name: "network_traffic_received"
-    description: "Network traffic received by the VM"
-    query: "rate(vm_network_receive_bytes_total{device='eth0'}[5m])"
-    threshold: 1000000000  # 1GB per 5 minutes
+  - name: "pvc_full"
+    description: "Persistent Volume Claim Usage"
+    query: "vm_kubernetes_pvc_usage_bytes{job='kubelet'} / vm_kubernetes_pvc_capacity_bytes{job='kubelet'} * 100"
+    threshold: 90
     condition: ">"
     datasource:
       name: "vmselect-instance-2"
       url: "http://vmselect-instance-2-url/api/v1/query"
-      query: "vm_network_receive_bytes_total{device='eth0'}"
     export:
       datastore: "file"
       file:
-        path: "network_received_export.json"
+        path: "pvc_usage_export.json"
       action: "export"
 
-  # Example for Disk I/O Time
-  - name: "disk_io_time"
-    description: "Disk I/O time for the VM"
-    query: "rate(vm_disk_io_time_seconds_total{device='sda'}[5m])"
-    threshold: 1.0
+  - name: "network_traffic"
+    description: "Network traffic of the VM"
+    query: "sum(rate(vm_network_receive_bytes_total[5m])) by (instance)"
+    threshold: 5000000
     condition: ">"
     datasource:
       name: "vmselect-instance-1"
       url: "http://vmselect-instance-1-url/api/v1/query"
-      query: "vm_disk_io_time_seconds_total{device='sda'}"
     export:
       datastore: "mysql"
       mysql:
@@ -86,20 +78,4 @@ rules:
         database: "metrics_database"
         user: "root"
         password: "password"
-      action: "export"
-    
-  # Example for Swap Usage
-  - name: "swap_usage"
-    description: "Swap usage of the VM"
-    query: "(vm_memory_swap_usage_bytes / vm_memory_swap_total_bytes) * 100"
-    threshold: 50
-    condition: ">"
-    datasource:
-      name: "vmselect-instance-1"
-      url: "http://vmselect-instance-1-url/api/v1/query"
-      query: "vm_memory_swap_usage_bytes"
-    export:
-      datastore: "file"
-      file:
-        path: "swap_usage_export.json"
       action: "export"
