@@ -1,8 +1,8 @@
 # Data source configuration (Multiple vmselects)
 datasources:
   - name: "vmselect-instance-1"
-    url: "http://vmselect-instance-1-url/api/v1/query"
-    query: 'your_query_1_here'
+    url: "http://victoria-metrics-cluster-vmselect.default.svc/api/v1/query"
+    query: '(vm_memory_usage_bytes / vm_memory_total_bytes) * 100'
   - name: "vmselect-instance-2"
     url: "http://vmselect-instance-2-url/api/v1/query"
     query: 'your_query_2_here'
