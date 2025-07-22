@@ -1,26 +1,32 @@
-import requests
 import yaml
+<<<<<<< HEAD
 import json
 import time
 import mysql.connector
 from mysql.connector import Error
+=======
+import requests
+import pymysql
+import json
+>>>>>>> 04b41fa... updated files
 
-# Load configuration from YAML
-def load_config(config_file='config.yaml'):
+# Load the YAML configuration file
+def load_config(config_file="config.yaml"):
     with open(config_file, 'r') as file:
-        config = yaml.safe_load(file)
-    return config
+        return yaml.safe_load(file)
 
-# Fetch metrics from vmselect API
-def fetch_metrics_from_vmselect(vmselect_url, query):
+# Function to query the datasource and fetch the metric value
+def query_datasource(url, query):
     try:
-        response = requests.get(vmselect_url, params={'query': query})
+        response = requests.get(url, params={"query": query})
         response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching metrics from {vmselect_url}: {e}")
+        data = response.json()
+        return data['data']
+    except Exception as e:
+        print(f"Error querying VictoriaMetrics: {e}")
         return None
 
+<<<<<<< HEAD
 # Process and check if a metric breaches its threshold
 def process_and_check_threshold(metrics_data, metric_config):
     results = []
@@ -78,49 +84,79 @@ def export_data_to_mysql(records, mysql_config):
         if connection.is_connected():
             cursor.close()
             connection.close()
-
-# Export data to a JSON file
-def export_data_to_file(records, file_path):
+=======
+# Function to export data to MySQL
+def export_to_mysql(mysql_config, data):
     try:
-        with open(file_path, 'w') as file:
-            json.dump(records, file, indent=4)
-        print(f"Data exported to {file_path}.")
+        connection = pymysql.connect(
+            host=mysql_config['host'],
+            user=mysql_config['user'],
+            password=mysql_config['password'],
+            database=mysql_config['database']
+        )
+        cursor = connection.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS metrics (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                metric_name VARCHAR(255),
+                value FLOAT,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        for metric in data:
+            cursor.execute("""
+                INSERT INTO metrics (metric_name, value) VALUES (%s, %s)
+            """, (metric['metric'], metric['value']))
+        connection.commit()
+        connection.close()
+        print(f"Data exported to MySQL: {len(data)} records")
     except Exception as e:
-        print(f"Error exporting data to file: {e}")
+        print(f"Error exporting to MySQL: {e}")
+>>>>>>> 04b41fa... updated files
 
-# Main function to run the process
-def main():
-    config = load_config()
+# Function to export data to a file
+def export_to_file(file_path, data):
+    try:
+        with open(file_path, 'w') as f:
+            json.dump(data, f, indent=4)
+        print(f"Data exported to file: {file_path}")
+    except Exception as e:
+        print(f"Error exporting to file: {e}")
 
-    vmselects = config['datasources']
-    metric_config = config['rules']
-    export_config = config['export']
+# Process each rule from the configuration
+def process_rules(config):
+    for rule in config['rules']:
+        print(f"Processing rule: {rule['name']}")
 
-    while True:
-        all_records_to_export = []
+        # Get the datasource URL and query the data
+        datasource_url = rule['datasource']['url']
+        query = rule['query']
+        result = query_datasource(datasource_url, query)
+        
+        if result is None:
+            print(f"No data returned for rule: {rule['name']}")
+            continue
+        
+        # Check if the value exceeds the threshold
+        metric_value = result[0].get('value')  # Assuming the first result contains the value
+        print(f"Queried Value: {metric_value} | Threshold: {rule['threshold']}")
+        
+        if rule['condition'] == ">" and metric_value > rule['threshold']:
+            print(f"Threshold exceeded for rule: {rule['name']}. Value: {metric_value} > {rule['threshold']}")
+            # Export data based on the export section
+            if rule['export']['datastore'] == 'mysql':
+                export_to_mysql(rule['export']['mysql'], result)
+            elif rule['export']['datastore'] == 'file':
+                export_to_file(rule['export']['file']['path'], result)
+        else:
+            print(f"Threshold not met for rule: {rule['name']}. Skipping export.")
 
-        # Loop over each vmselect instance
-        for vmselect in vmselects:
-            vmselect_url = vmselect['url']
-            query = vmselect['query']
-            
-            # Fetch metrics from vmselect
-            metrics_data = fetch_metrics_from_vmselect(vmselect_url, query)
-            if metrics_data:
-                # Process and check thresholds for each metric
-                records_to_export = process_and_check_threshold(metrics_data, metric_config)
-                all_records_to_export.extend(records_to_export)
-
-        # Export the collected records if any threshold was breached
-        if all_records_to_export:
-            if export_config['datastore'] == 'mysql':
-                export_data_to_mysql(all_records_to_export, export_config['mysql'])
-            elif export_config['datastore'] == 'file':
-                export_data_to_file(all_records_to_export, export_config['file']['path'])
-
-        # Wait for the next poll (e.g., 60 seconds)
-        time.sleep(60)
-
+# Main function to run the script
 if __name__ == "__main__":
+<<<<<<< HEAD
     main()
     
+=======
+    config = load_config()  # Load the configuration from config.yaml
+    process_rules(config)  # Process each rule in the config
+>>>>>>> 04b41fa... updated files
