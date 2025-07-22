@@ -118,7 +118,7 @@ def main():
             elif export_config['datastore'] == 'file':
                 export_data_to_file(all_records_to_export, export_config['file']['path'])
 
-        # Wait for the next poll (e.g., 60 seconds)
+        # Wait for the next polls
         time.sleep(60)
 
 if __name__ == "__main__":

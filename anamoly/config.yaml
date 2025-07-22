@@ -31,4 +31,4 @@ export:
     user: "your_username"
     password: "your_password"
   file:
-    path: "exported_metrics.json"  # Path to store data as JSON file
+    path: "exported_metrics.json"
