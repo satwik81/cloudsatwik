@@ -1,0 +1,284 @@
+# Advanced Threshold-based Data Router using vmagent
+# This configuration shows how to route threshold-triggered data to different datasources
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vmagent-threshold-router-config
+  namespace: monitoring
+data:
+  vmagent.yml: |
+    global:
+      scrape_interval: 30s
+      evaluation_interval: 30s
+
+    # Remote write configurations for different threshold-triggered exports
+    remote_write:
+      # Route 1: High priority incidents to incident management system
+      - url: "http://incident-storage-vminsert:8480/insert/0/prometheus"
+        write_relabel_configs:
+          # Only export data with critical severity or specific export targets
+          - source_labels: [severity]
+            regex: "critical"
+            action: keep
+          - source_labels: [export_target]
+            regex: "incident_storage"
+            action: keep
+          # Add routing metadata
+          - target_label: routed_by
+            replacement: "threshold_router"
+          - target_label: route_reason
+            replacement: "critical_threshold"
+
+      # Route 2: Long-term storage for trend analysis
+      - url: "http://long-term-storage:8428/api/v1/write"
+        write_relabel_configs:
+          - source_labels: [export_target]
+            regex: "long_term_storage"
+            action: keep
+          - target_label: retention_policy
+            replacement: "1year"
+
+      # Route 3: Security events to SIEM system
+      - url: "http://security-siem:9200/_bulk"
+        format: "elasticsearch"
+        write_relabel_configs:
+          - source_labels: [export_target]
+            regex: "security_.*"
+            action: keep
+          - target_label: index_pattern
+            replacement: "security-metrics"
+
+      # Route 4: Debug storage for development team
+      - url: "http://debug-storage:8428/api/v1/write"
+        write_relabel_configs:
+          - source_labels: [export_target]
+            regex: "debug_storage"
+            action: keep
+          - source_labels: [export_reason]
+            regex: "error_rate_spike"
+            action: keep
+
+      # Route 5: General separate datasource for threshold breaches
+      - url: "http://separate-ds-vminsert:8480/insert/0/prometheus"
+        write_relabel_configs:
+          - source_labels: [export_target]
+            regex: "separate_ds"
+            action: keep
+          # Enrich with additional metadata
+          - target_label: data_source
+            replacement: "threshold_triggered"
+          - target_label: export_timestamp
+            replacement: "__timestamp__"
+
+    # Scrape configuration to collect from vmalert
+    scrape_configs:
+      - job_name: 'threshold-data-exporter'
+        static_configs:
+          - targets: ['threshold-data-exporter:8880']
+        scrape_interval: 15s
+        metrics_path: /metrics
+        # Only scrape specific metrics that indicate threshold breaches
+        metric_relabel_configs:
+          - source_labels: [__name__]
+            regex: ".*_export"
+            action: keep
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vmagent-threshold-router
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vmagent-threshold-router
+  template:
+    metadata:
+      labels:
+        app: vmagent-threshold-router
+    spec:
+      containers:
+      - name: vmagent
+        image: victoriametrics/vmagent:latest
+        args:
+          - "-promscrape.config=/etc/vmagent/vmagent.yml"
+          - "-remoteWrite.tmpDataPath=/tmp/vmagent-remotewrite-data"
+          - "-httpListenAddr=:8429"
+          # Enable detailed logging for troubleshooting
+          - "-loggerLevel=INFO"
+          # Configure memory and performance
+          - "-memory.allowedPercent=80"
+          - "-remoteWrite.queues=4"
+          - "-remoteWrite.flushInterval=5s"
+        
+        ports:
+        - containerPort: 8429
+          name: http
+        
+        volumeMounts:
+        - name: config
+          mountPath: /etc/vmagent
+        - name: tmp-data
+          mountPath: /tmp/vmagent-remotewrite-data
+        
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      
+      volumes:
+      - name: config
+        configMap:
+          name: vmagent-threshold-router-config
+      - name: tmp-data
+        emptyDir: {}
+
+---
+# Enhanced vmalert configuration with conditional exports
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: enhanced-threshold-export-rules
+  namespace: monitoring
+data:
+  advanced-export-rules.yml: |
+    groups:
+      # CPU threshold with conditional routing
+      - name: advanced_cpu_threshold_export
+        interval: 30s
+        rules:
+          # Export high CPU with different severity levels
+          - record: cpu_threshold_warning
+            expr: 'cpu_usage_percent > 80 and cpu_usage_percent <= 95'
+            labels:
+              export_reason: "cpu_warning"
+              severity: "warning"
+              export_target: "separate_ds"
+              team: "infrastructure"
+          
+          - record: cpu_threshold_critical
+            expr: 'cpu_usage_percent > 95'
+            labels:
+              export_reason: "cpu_critical"
+              severity: "critical"
+              export_target: "incident_storage"
+              team: "infrastructure"
+              escalation: "immediate"
+
+      # Memory with predictive thresholds
+      - name: predictive_memory_export
+        interval: 1m
+        rules:
+          # Current high memory usage
+          - record: memory_current_high
+            expr: '(memory_used / memory_total) * 100 > 85'
+            labels:
+              export_reason: "memory_high_current"
+              severity: "warning"
+              export_target: "long_term_storage"
+          
+          # Predicted memory exhaustion (using increase over time)
+          - record: memory_exhaustion_predicted
+            expr: 'predict_linear(memory_used[30m], 3600) / memory_total > 0.95'
+            labels:
+              export_reason: "memory_exhaustion_predicted"
+              severity: "critical"
+              export_target: "incident_storage"
+              prediction_horizon: "1hour"
+
+      # Application performance thresholds
+      - name: application_performance_export
+        interval: 30s
+        rules:
+          # Response time threshold
+          - record: response_time_threshold_breach
+            expr: 'histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1.0'
+            labels:
+              export_reason: "response_time_degradation"
+              severity: "warning"
+              export_target: "debug_storage"
+              slo_breach: "true"
+          
+          # Error rate with business impact calculation
+          - record: business_impact_error_rate
+            expr: 'rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.01'
+            labels:
+              export_reason: "business_impact_errors"
+              severity: "critical"
+              export_target: "incident_storage"
+              business_impact: "high"
+
+      # Security and anomaly detection
+      - name: security_threshold_export
+        interval: 1m
+        rules:
+          # Unusual login patterns
+          - record: unusual_login_pattern
+            expr: 'rate(login_attempts_total[5m]) > rate(login_attempts_total[1h] offset 1h) * 3'
+            labels:
+              export_reason: "unusual_login_pattern"
+              severity: "warning"
+              export_target: "security_siem"
+              anomaly_type: "authentication"
+          
+          # Network traffic anomaly
+          - record: network_traffic_anomaly
+            expr: 'rate(network_bytes_total[5m]) > quantile(0.95, rate(network_bytes_total[5m] offset 24h))'
+            labels:
+              export_reason: "network_traffic_spike"
+              severity: "info"
+              export_target: "security_analysis"
+              anomaly_type: "network"
+
+  # VictoriaLogs rules for log-based thresholds
+  vlogs-advanced-rules.yml: |
+    groups:
+      - name: advanced_log_threshold_export
+        type: vlogs
+        interval: 2m
+        rules:
+          # Error spike detection with context
+          - record: error_spike_with_context
+            expr: |
+              _time:5m | filter level="error" 
+              | stats by (service, container) count() as error_count 
+              | filter error_count > 50
+            labels:
+              export_reason: "error_spike_detected"
+              severity: "warning"
+              export_target: "log_analysis_ds"
+              context: "service_level"
+          
+          # Security events aggregation
+          - record: security_events_aggregated
+            expr: |
+              _time:10m | filter message:~"(failed.*login|authentication.*failed|unauthorized.*access)"
+              | extract "ip=<source_ip>" 
+              | stats by (source_ip) count() as failed_attempts 
+              | filter failed_attempts > 20
+            labels:
+              export_reason: "security_breach_attempt"
+              severity: "critical"
+              export_target: "security_siem"
+              action_required: "block_ip"
+
+---
+# Service for the enhanced router
+apiVersion: v1
+kind: Service
+metadata:
+  name: vmagent-threshold-router
+  namespace: monitoring
+spec:
+  selector:
+    app: vmagent-threshold-router
+  ports:
+  - port: 8429
+    targetPort: 8429
+    name: http

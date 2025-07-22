@@ -1,0 +1,196 @@
+# Threshold-based Data Export Configuration
+# Similar to vmalert alarm triggering but for data export
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: threshold-export-config
+  namespace: monitoring
+data:
+  # Main configuration for threshold-based data export
+  export-rules.yml: |
+    groups:
+      # Example 1: Export high CPU usage data when threshold is met
+      - name: cpu_threshold_export
+        interval: 30s
+        rules:
+          # Recording rule that captures data when CPU > 80%
+          - record: high_cpu_usage_export
+            expr: 'cpu_usage_percent > 80'
+            labels:
+              export_reason: "cpu_threshold_exceeded"
+              severity: "warning"
+              export_target: "separate_ds"
+          
+          # Recording rule for critical CPU threshold
+          - record: critical_cpu_usage_export
+            expr: 'cpu_usage_percent > 95'
+            labels:
+              export_reason: "cpu_critical_threshold"
+              severity: "critical"
+              export_target: "separate_ds"
+
+      # Example 2: Export memory pressure data
+      - name: memory_threshold_export
+        interval: 1m
+        rules:
+          - record: memory_pressure_export
+            expr: '(memory_used / memory_total) * 100 > 85'
+            labels:
+              export_reason: "memory_pressure"
+              severity: "warning"
+              export_target: "long_term_storage"
+
+      # Example 3: Export disk space issues
+      - name: disk_threshold_export
+        interval: 5m
+        rules:
+          - record: disk_space_critical_export
+            expr: '(disk_used / disk_total) * 100 > 90'
+            labels:
+              export_reason: "disk_space_critical"
+              severity: "critical"
+              export_target: "incident_storage"
+
+      # Example 4: Export application error rate spikes
+      - name: error_rate_threshold_export
+        interval: 1m
+        rules:
+          - record: error_rate_spike_export
+            expr: 'rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05'
+            labels:
+              export_reason: "error_rate_spike"
+              severity: "warning"
+              export_target: "debug_storage"
+
+      # Example 5: Network anomaly detection and export
+      - name: network_threshold_export
+        interval: 30s
+        rules:
+          - record: network_anomaly_export
+            expr: 'network_bytes_transferred > 1000000000'  # 1GB threshold
+            labels:
+              export_reason: "network_anomaly"
+              severity: "info"
+              export_target: "security_analysis"
+
+  # VictoriaLogs integration for log-based thresholds
+  vlogs-export-rules.yml: |
+    groups:
+      - name: log_threshold_export
+        type: vlogs
+        interval: 2m
+        rules:
+          # Export error logs when threshold is met
+          - record: error_logs_threshold_export
+            expr: '_time:5m | filter level="error" | stats count() as error_count | filter error_count > 100'
+            labels:
+              export_reason: "error_log_threshold"
+              severity: "warning"
+              export_target: "log_analysis_ds"
+          
+          # Export security-related logs
+          - record: security_events_export
+            expr: '_time:5m | filter message:~"authentication|login|security" | stats count() as security_events | filter security_events > 10'
+            labels:
+              export_reason: "security_threshold"
+              severity: "critical"
+              export_target: "security_siem"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: threshold-data-exporter
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: threshold-data-exporter
+  template:
+    metadata:
+      labels:
+        app: threshold-data-exporter
+    spec:
+      containers:
+      - name: vmalert
+        image: victoriametrics/vmalert:latest
+        args:
+          # Primary datasource for querying metrics
+          - "-datasource.url=http://victoriametrics:8428"
+          
+          # Multiple remote write URLs for different export targets
+          - "-remoteWrite.url=http://separate-ds-vminsert:8480/insert/0/prometheus"
+          - "-remoteWrite.url=http://long-term-storage:8428"
+          - "-remoteWrite.url=http://incident-storage:8428"
+          
+          # Rules configuration
+          - "-rule=/etc/rules/export-rules.yml"
+          - "-rule=/etc/rules/vlogs-export-rules.yml"
+          
+          # Default rule type
+          - "-rule.defaultRuleType=prometheus"
+          
+          # Evaluation settings
+          - "-evaluationInterval=30s"
+          - "-rule.evalDelay=10s"
+          
+          # External labels for identification
+          - "-external.label=exporter=threshold-data-exporter"
+          - "-external.label=environment=production"
+          
+          # Enable debug for troubleshooting
+          - "-loggerLevel=INFO"
+        
+        ports:
+        - containerPort: 8880
+          name: http
+        
+        volumeMounts:
+        - name: rules-config
+          mountPath: /etc/rules
+        
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+      
+      volumes:
+      - name: rules-config
+        configMap:
+          name: threshold-export-config
+
+---
+# Service for the threshold data exporter
+apiVersion: v1
+kind: Service
+metadata:
+  name: threshold-data-exporter
+  namespace: monitoring
+spec:
+  selector:
+    app: threshold-data-exporter
+  ports:
+  - port: 8880
+    targetPort: 8880
+    name: http
+
+---
+# ServiceMonitor for Prometheus to scrape metrics from the exporter
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: threshold-data-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: threshold-data-exporter
+  endpoints:
+  - port: http
+    interval: 30s
+    path: /metrics

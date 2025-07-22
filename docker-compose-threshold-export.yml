@@ -1,0 +1,332 @@
+# Docker Compose setup for testing threshold-based data export system
+version: '3.8'
+
+services:
+  # Primary VictoriaMetrics instance (source of data)
+  victoriametrics-primary:
+    image: victoriametrics/victoria-metrics:latest
+    container_name: vm-primary
+    ports:
+      - "8428:8428"
+    command:
+      - "--storageDataPath=/victoria-metrics-data"
+      - "--httpListenAddr=:8428"
+      - "--retentionPeriod=1y"
+    volumes:
+      - vm_primary_data:/victoria-metrics-data
+    networks:
+      - monitoring
+
+  # Separate VictoriaMetrics instance for exported threshold data
+  victoriametrics-separate:
+    image: victoriametrics/victoria-metrics:latest
+    container_name: vm-separate
+    ports:
+      - "8429:8428"
+    command:
+      - "--storageDataPath=/victoria-metrics-data"
+      - "--httpListenAddr=:8428"
+      - "--retentionPeriod=2y"
+    volumes:
+      - vm_separate_data:/victoria-metrics-data
+    networks:
+      - monitoring
+
+  # Debug storage for development team
+  victoriametrics-debug:
+    image: victoriametrics/victoria-metrics:latest
+    container_name: vm-debug
+    ports:
+      - "8430:8428"
+    command:
+      - "--storageDataPath=/victoria-metrics-data"
+      - "--httpListenAddr=:8428"
+      - "--retentionPeriod=30d"
+    volumes:
+      - vm_debug_data:/victoria-metrics-data
+    networks:
+      - monitoring
+
+  # Incident storage for critical data
+  victoriametrics-incident:
+    image: victoriametrics/victoria-metrics:latest
+    container_name: vm-incident
+    ports:
+      - "8431:8428"
+    command:
+      - "--storageDataPath=/victoria-metrics-data"
+      - "--httpListenAddr=:8428"
+      - "--retentionPeriod=5y"
+    volumes:
+      - vm_incident_data:/victoria-metrics-data
+    networks:
+      - monitoring
+
+  # VictoriaLogs for log-based thresholds
+  victorialogs:
+    image: victoriametrics/victoria-logs:latest
+    container_name: vlogs
+    ports:
+      - "9428:9428"
+    command:
+      - "--storageDataPath=/victoria-logs-data"
+      - "--httpListenAddr=:9428"
+    volumes:
+      - vlogs_data:/victoria-logs-data
+    networks:
+      - monitoring
+
+  # vmalert for threshold evaluation and recording rules
+  vmalert-threshold-exporter:
+    image: victoriametrics/vmalert:latest
+    container_name: vmalert-exporter
+    ports:
+      - "8880:8880"
+    command:
+      - "--datasource.url=http://victoriametrics-primary:8428"
+      - "--remoteWrite.url=http://vmagent-router:8429/api/v1/write"
+      - "--remoteRead.url=http://victoriametrics-primary:8428"
+      - "--rule=/etc/rules/threshold-rules.yml"
+      - "--rule=/etc/rules/vlogs-rules.yml"
+      - "--rule.defaultRuleType=prometheus"
+      - "--evaluationInterval=30s"
+      - "--rule.evalDelay=10s"
+      - "--external.label=system=threshold-exporter"
+      - "--external.label=environment=testing"
+      - "--httpListenAddr=:8880"
+      - "--loggerLevel=INFO"
+    volumes:
+      - ./rules:/etc/rules:ro
+    depends_on:
+      - victoriametrics-primary
+      - vmagent-router
+    networks:
+      - monitoring
+
+  # vmagent for intelligent routing of threshold data
+  vmagent-router:
+    image: victoriametrics/vmagent:latest
+    container_name: vmagent-router
+    ports:
+      - "8427:8429"
+    command:
+      - "--remoteWrite.url=http://victoriametrics-separate:8428/api/v1/write"
+      - "--remoteWrite.url=http://victoriametrics-debug:8428/api/v1/write"
+      - "--remoteWrite.url=http://victoriametrics-incident:8428/api/v1/write"
+      - "--remoteWrite.tmpDataPath=/tmp/vmagent-data"
+      - "--httpListenAddr=:8429"
+      - "--remoteWrite.flushInterval=5s"
+      - "--remoteWrite.queues=4"
+      - "--loggerLevel=INFO"
+      # Configure routing based on labels
+      - "--remoteWrite.urlRelabelConfig=/etc/vmagent/relabel-separate.yml"
+      - "--remoteWrite.urlRelabelConfig=/etc/vmagent/relabel-debug.yml"
+      - "--remoteWrite.urlRelabelConfig=/etc/vmagent/relabel-incident.yml"
+    volumes:
+      - ./vmagent-config:/etc/vmagent:ro
+      - vmagent_data:/tmp/vmagent-data
+    depends_on:
+      - victoriametrics-separate
+      - victoriametrics-debug
+      - victoriametrics-incident
+    networks:
+      - monitoring
+
+  # Data generator for testing
+  prometheus-node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      - monitoring
+
+  # vmagent to scrape test data and send to primary VM
+  vmagent-scraper:
+    image: victoriametrics/vmagent:latest
+    container_name: vmagent-scraper
+    command:
+      - "--promscrape.config=/etc/prometheus/prometheus.yml"
+      - "--remoteWrite.url=http://victoriametrics-primary:8428/api/v1/write"
+      - "--httpListenAddr=:8429"
+    volumes:
+      - ./scrape-config:/etc/prometheus:ro
+    depends_on:
+      - victoriametrics-primary
+      - prometheus-node-exporter
+    networks:
+      - monitoring
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - victoriametrics-primary
+      - victoriametrics-separate
+      - victoriametrics-debug
+      - victoriametrics-incident
+    networks:
+      - monitoring
+
+volumes:
+  vm_primary_data:
+  vm_separate_data:
+  vm_debug_data:
+  vm_incident_data:
+  vlogs_data:
+  vmagent_data:
+  grafana_data:
+
+networks:
+  monitoring:
+    driver: bridge
+
+---
+# Configuration files that need to be created
+
+# ./rules/threshold-rules.yml
+threshold-rules.yml: |
+  groups:
+    # CPU threshold exports
+    - name: cpu_threshold_export
+      interval: 30s
+      rules:
+        - record: cpu_high_export
+          expr: '(100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 80'
+          labels:
+            export_reason: "cpu_high"
+            severity: "warning"
+            export_target: "separate_ds"
+            team: "infrastructure"
+        
+        - record: cpu_critical_export
+          expr: '(100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 95'
+          labels:
+            export_reason: "cpu_critical"
+            severity: "critical"
+            export_target: "incident_storage"
+            escalation: "immediate"
+
+    # Memory threshold exports
+    - name: memory_threshold_export
+      interval: 1m
+      rules:
+        - record: memory_high_export
+          expr: '(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85'
+          labels:
+            export_reason: "memory_pressure"
+            severity: "warning"
+            export_target: "debug_storage"
+        
+        - record: memory_critical_export
+          expr: '(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95'
+          labels:
+            export_reason: "memory_critical"
+            severity: "critical"
+            export_target: "incident_storage"
+
+    # Disk space threshold exports
+    - name: disk_threshold_export
+      interval: 5m
+      rules:
+        - record: disk_space_high_export
+          expr: '(1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100 > 80'
+          labels:
+            export_reason: "disk_space_high"
+            severity: "warning"
+            export_target: "separate_ds"
+        
+        - record: disk_space_critical_export
+          expr: '(1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100 > 90'
+          labels:
+            export_reason: "disk_space_critical"
+            severity: "critical"
+            export_target: "incident_storage"
+
+# ./rules/vlogs-rules.yml
+vlogs-rules.yml: |
+  groups:
+    - name: log_threshold_export
+      type: vlogs
+      interval: 2m
+      rules:
+        - record: error_logs_export
+          expr: '_time:5m | filter level="error" | stats count() as error_count | filter error_count > 10'
+          labels:
+            export_reason: "error_spike"
+            severity: "warning"
+            export_target: "debug_storage"
+            log_type: "application_errors"
+
+# ./scrape-config/prometheus.yml
+prometheus.yml: |
+  global:
+    scrape_interval: 15s
+    evaluation_interval: 15s
+
+  scrape_configs:
+    - job_name: 'node-exporter'
+      static_configs:
+        - targets: ['prometheus-node-exporter:9100']
+      scrape_interval: 15s
+
+# ./vmagent-config/relabel-separate.yml
+relabel-separate.yml: |
+  - source_labels: [export_target]
+    regex: "separate_ds"
+    action: keep
+  - target_label: routed_to
+    replacement: "separate_storage"
+
+# ./vmagent-config/relabel-debug.yml  
+relabel-debug.yml: |
+  - source_labels: [export_target]
+    regex: "debug_storage"
+    action: keep
+  - target_label: routed_to
+    replacement: "debug_storage"
+
+# ./vmagent-config/relabel-incident.yml
+relabel-incident.yml: |
+  - source_labels: [export_target]
+    regex: "incident_storage"
+    action: keep
+  - target_label: routed_to
+    replacement: "incident_storage"
+
+# ./grafana/provisioning/datasources/datasources.yml
+datasources.yml: |
+  apiVersion: 1
+  datasources:
+    - name: VictoriaMetrics-Primary
+      type: prometheus
+      url: http://victoriametrics-primary:8428
+      access: proxy
+      isDefault: true
+    
+    - name: VictoriaMetrics-Separate
+      type: prometheus
+      url: http://victoriametrics-separate:8428
+      access: proxy
+    
+    - name: VictoriaMetrics-Debug
+      type: prometheus
+      url: http://victoriametrics-debug:8428
+      access: proxy
+    
+    - name: VictoriaMetrics-Incident
+      type: prometheus
+      url: http://victoriametrics-incident:8428
+      access: proxy
