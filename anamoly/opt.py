@@ -92,8 +92,8 @@ def export_data_to_file(records, file_path):
 def main():
     config = load_config()
 
-    vmselects = config['vmselects']
-    metric_config = config['metrics']
+    vmselects = config['datasources']
+    metric_config = config['rules']
     export_config = config['export']
 
     while True:
