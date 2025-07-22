@@ -1,0 +1,34 @@
+# Data source configuration (Multiple vmselects)
+vmselects:
+  - url: "http://vmselect-instance-1-url/api/v1/query"
+    query: 'your_query_1_here'
+  - url: "http://vmselect-instance-2-url/api/v1/query"
+    query: 'your_query_2_here'
+  - url: "http://vmselect-instance-3-url/api/v1/query"
+    query: 'your_query_3_here'
+
+# Threshold and rule settings for different metrics
+metrics:
+  - name: "cpu_usage"
+    threshold: 80
+    condition: ">"
+    action: "export"
+  - name: "memory_usage"
+    threshold: 75
+    condition: ">"
+    action: "export"
+  - name: "disk_space"
+    threshold: 90
+    condition: "<"
+    action: "export"
+
+# Export configuration
+export:
+  datastore: "mysql"  # Can be 'mysql', 'postgres', or 'file'
+  mysql:
+    host: "localhost"
+    database: "your_database"
+    user: "your_username"
+    password: "your_password"
+  file:
+    path: "exported_metrics.json"  # Path to store data as JSON file
