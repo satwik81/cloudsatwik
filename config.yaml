@@ -1,0 +1,109 @@
+# Data Processing Configuration
+# This file defines datasources, processing rules, thresholds, and export destinations
+
+datasources:
+  primary_db:
+    type: "postgresql"
+    host: "localhost"
+    port: 5432
+    database: "analytics"
+    username: "user"
+    password: "password"
+    query: "SELECT id, value, timestamp, category FROM metrics WHERE timestamp > NOW() - INTERVAL '1 hour'"
+    
+  api_source:
+    type: "rest_api"
+    url: "https://api.example.com/metrics"
+    method: "GET"
+    headers:
+      Authorization: "Bearer your_token_here"
+      Content-Type: "application/json"
+    params:
+      limit: 1000
+      format: "json"
+    
+  csv_file:
+    type: "csv"
+    path: "/data/input/metrics.csv"
+    delimiter: ","
+    encoding: "utf-8"
+
+# Processing rules with thresholds
+processing_rules:
+  - name: "high_value_filter"
+    description: "Filter records with high values"
+    threshold_field: "value"
+    threshold_type: "greater_than"
+    threshold_value: 100
+    export_target: "high_value_db"
+    
+  - name: "critical_alerts"
+    description: "Critical alerts based on multiple conditions"
+    conditions:
+      - field: "value"
+        operator: "greater_than"
+        value: 500
+      - field: "category"
+        operator: "equals"
+        value: "error"
+    export_target: "alert_system"
+    
+  - name: "low_value_archive"
+    description: "Archive low value records"
+    threshold_field: "value"
+    threshold_type: "less_than"
+    threshold_value: 10
+    export_target: "archive_storage"
+    
+  - name: "time_based_processing"
+    description: "Process recent records"
+    threshold_field: "timestamp"
+    threshold_type: "within_hours"
+    threshold_value: 2
+    export_target: "real_time_db"
+
+# Export destinations
+export_targets:
+  high_value_db:
+    type: "postgresql"
+    host: "high-value-db.example.com"
+    port: 5432
+    database: "high_value_metrics"
+    username: "admin"
+    password: "secure_password"
+    table: "high_value_records"
+    
+  alert_system:
+    type: "rest_api"
+    url: "https://alerts.example.com/api/alerts"
+    method: "POST"
+    headers:
+      Authorization: "Bearer alert_token"
+      Content-Type: "application/json"
+    batch_size: 10
+    
+  archive_storage:
+    type: "s3"
+    bucket: "data-archive"
+    region: "us-east-1"
+    access_key: "your_access_key"
+    secret_key: "your_secret_key"
+    prefix: "archived_metrics/"
+    
+  real_time_db:
+    type: "redis"
+    host: "redis.example.com"
+    port: 6379
+    database: 0
+    password: "redis_password"
+    key_prefix: "realtime:"
+
+# Global settings
+settings:
+  batch_size: 1000
+  retry_attempts: 3
+  retry_delay: 5  # seconds
+  log_level: "INFO"
+  max_memory_usage: "512MB"
+  parallel_processing: true
+  max_workers: 4
