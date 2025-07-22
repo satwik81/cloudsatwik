@@ -24,7 +24,7 @@ metrics:
 
 # Export configuration
 export:
-  datastore: "mysql"  # Can be 'mysql', 'postgres', or 'file'
+  datastore: "mysql"  # Can be 'mysql', 'postgres'
   mysql:
     host: "localhost"
     database: "your_database"
