@@ -1,22 +1,39 @@
 # CPU metrics
+# HELP vm_cpu_seconds_total Total CPU time spent in various modes (idle, system, user)
+# TYPE vm_cpu_seconds_total counter
 vm_cpu_seconds_total{instance="host1", mode="idle"} 0.1
 vm_cpu_seconds_total{instance="host1", mode="system"} 0.7
 vm_cpu_seconds_total{instance="host1", mode="user"} 1.2
 
 # Memory metrics
+# HELP vm_memory_usage_bytes Memory usage in bytes
+# TYPE vm_memory_usage_bytes gauge
 vm_memory_usage_bytes{instance="host1"} 800000000
+
+# HELP vm_memory_total_bytes Total memory in bytes
+# TYPE vm_memory_total_bytes gauge
 vm_memory_total_bytes{instance="host1"} 1000000000
 
 # Disk metrics
+# HELP vm_disk_io_time_seconds_total Disk I/O time in seconds
+# TYPE vm_disk_io_time_seconds_total counter
 vm_disk_io_time_seconds_total{instance="host1", device="sda"} 2.5
 
 # PVC metrics
+# HELP vm_kubernetes_pvc_usage_bytes PVC usage in bytes
+# TYPE vm_kubernetes_pvc_usage_bytes gauge
 vm_kubernetes_pvc_usage_bytes{instance="host1", job="kubelet"} 800000000
+
+# HELP vm_kubernetes_pvc_capacity_bytes PVC capacity in bytes
+# TYPE vm_kubernetes_pvc_capacity_bytes gauge
 vm_kubernetes_pvc_capacity_bytes{instance="host1", job="kubelet"} 1000000000
 
 # Network metrics
+# HELP vm_network_receive_bytes_total Total network received bytes
+# TYPE vm_network_receive_bytes_total counter
 vm_network_receive_bytes_total{instance="host1"} 6000000
 
-# Add a custom metric for testing alerts
+# Custom metric for testing alerts
+# HELP custom_test_metric Custom test metric for alerting
+# TYPE custom_test_metric gauge
 custom_test_metric{env="dev"} 99
-
