@@ -1,0 +1,9 @@
+{
+  "description": "Memory usage of the VM",
+  "metric": {
+    "instance": "host1"
+  },
+  "name": "memory_usage",
+  "time": "2025-07-23T08:26:28+05:30",
+  "value": 90
+}

@@ -1,0 +1,22 @@
+# CPU metrics
+vm_cpu_seconds_total{instance="host1", mode="idle"} 0.1
+vm_cpu_seconds_total{instance="host1", mode="system"} 0.7
+vm_cpu_seconds_total{instance="host1", mode="user"} 1.2
+
+# Memory metrics
+vm_memory_usage_bytes{instance="host1"} 800000000
+vm_memory_total_bytes{instance="host1"} 1000000000
+
+# Disk metrics
+vm_disk_io_time_seconds_total{instance="host1", device="sda"} 2.5
+
+# PVC metrics
+vm_kubernetes_pvc_usage_bytes{instance="host1", job="kubelet"} 800000000
+vm_kubernetes_pvc_capacity_bytes{instance="host1", job="kubelet"} 1000000000
+
+# Network metrics
+vm_network_receive_bytes_total{instance="host1"} 6000000
+
+# Add a custom metric for testing alerts
+custom_test_metric{env="dev"} 99
+
