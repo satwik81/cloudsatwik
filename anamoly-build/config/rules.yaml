@@ -12,6 +12,9 @@ exports:
     password: "password"  # MySQL password
     database: "metrics_database"  # MySQL database
     port: 3306  # MySQL port, default is 3306
+  victoriametrics:
+    url: "http://your-victoriametrics-instance:8428"  # URL of your VictoriaMetrics instance
+
 
 rules:
   - name: "cpu_utilization"
