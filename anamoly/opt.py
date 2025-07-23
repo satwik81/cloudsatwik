@@ -1,5 +1,6 @@
 import yaml
 <<<<<<< HEAD
+<<<<<<< HEAD
 import json
 import time
 import mysql.connector
@@ -9,6 +10,11 @@ import requests
 import pymysql
 import json
 >>>>>>> 04b41fa... updated files
+=======
+import requests
+import pymysql
+import json
+>>>>>>> bcf29cec80e2cb6f37ccd768f8fcc63748557fcb
 
 # Load the YAML configuration file
 def load_config(config_file="config.yaml"):
@@ -26,6 +32,7 @@ def query_datasource(url, query):
         print(f"Error querying VictoriaMetrics: {e}")
         return None
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 # Process and check if a metric breaches its threshold
 def process_and_check_threshold(metrics_data, metric_config):
@@ -61,22 +68,32 @@ def process_and_check_threshold(metrics_data, metric_config):
 
 # Export data to MySQL database
 def export_data_to_mysql(records, mysql_config):
+=======
+# Function to export data to MySQL
+def export_to_mysql(mysql_config, data):
+>>>>>>> bcf29cec80e2cb6f37ccd768f8fcc63748557fcb
     try:
-        connection = mysql.connector.connect(**mysql_config)
+        connection = pymysql.connect(
+            host=mysql_config['host'],
+            user=mysql_config['user'],
+            password=mysql_config['password'],
+            database=mysql_config['database']
+        )
         cursor = connection.cursor()
-
-        for record in records:
-            timestamp = record.get('timestamp', time.time())  # Use current timestamp if not provided
-            value = record['value']
-            metric_name = record['metric']
-
-            insert_query = """
-            INSERT INTO metrics (metric_name, timestamp, value)
-            VALUES (%s, %s, %s)
-            """
-            cursor.execute(insert_query, (metric_name, timestamp, value))
-        
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS metrics (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                metric_name VARCHAR(255),
+                value FLOAT,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        for metric in data:
+            cursor.execute("""
+                INSERT INTO metrics (metric_name, value) VALUES (%s, %s)
+            """, (metric['metric'], metric['value']))
         connection.commit()
+<<<<<<< HEAD
         print(f"{len(records)} records exported to MySQL.")
     except Error as e:
         print(f"Error exporting data to MySQL: {e}")
@@ -128,6 +145,27 @@ def process_rules(config):
     for rule in config['rules']:
         print(f"Processing rule: {rule['name']}")
 
+=======
+        connection.close()
+        print(f"Data exported to MySQL: {len(data)} records")
+    except Exception as e:
+        print(f"Error exporting to MySQL: {e}")
+
+# Function to export data to a file
+def export_to_file(file_path, data):
+    try:
+        with open(file_path, 'w') as f:
+            json.dump(data, f, indent=4)
+        print(f"Data exported to file: {file_path}")
+    except Exception as e:
+        print(f"Error exporting to file: {e}")
+
+# Process each rule from the configuration
+def process_rules(config):
+    for rule in config['rules']:
+        print(f"Processing rule: {rule['name']}")
+
+>>>>>>> bcf29cec80e2cb6f37ccd768f8fcc63748557fcb
         # Get the datasource URL and query the data
         datasource_url = rule['datasource']['url']
         query = rule['query']
@@ -154,9 +192,14 @@ def process_rules(config):
 # Main function to run the script
 if __name__ == "__main__":
 <<<<<<< HEAD
+<<<<<<< HEAD
     main()
     
 =======
     config = load_config()  # Load the configuration from config.yaml
     process_rules(config)  # Process each rule in the config
 >>>>>>> 04b41fa... updated files
+=======
+    config = load_config()  # Load the configuration from config.yaml
+    process_rules(config)  # Process each rule in the config
+>>>>>>> bcf29cec80e2cb6f37ccd768f8fcc63748557fcb

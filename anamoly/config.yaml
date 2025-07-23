@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Data source configuration (Multiple vmselects)
 vmselects:
   - url: "http://vmselect-instance-1-url/api/v1/query"
@@ -7,22 +8,74 @@ vmselects:
     query: 'your_query_2_here'
   - url: "http://vmselect-instance-3-url/api/v1/query"
     query: 'your_query_3_here'
+=======
+# Configuration file with rules, datasources, and export options
+>>>>>>> bcf29cec80e2cb6f37ccd768f8fcc63748557fcb
 
-# Threshold and rule settings for different metrics
-metrics:
-  - name: "cpu_usage"
-    threshold: 80
+rules:
+  - name: "cpu_utilization"
+    description: "CPU utilization of the VM"
+    query: "100 - avg(rate(vm_cpu_seconds_total{mode='idle'}[5m])) by (instance) * 100"
+    threshold: 90
     condition: ">"
-    action: "export"
+    datasource:
+      name: "vmselect-instance-1"
+      url: "http://localhost:8080/api/v1/query"
+    export:
+      datastore: "mysql"
+      mysql:
+        host: "localhost"
+        database: "metrics_database"
+        user: "root"
+        password: "password"
+      action: "export"
+
   - name: "memory_usage"
+    description: "Memory usage of the VM"
+    query: "(vm_memory_usage_bytes / vm_memory_total_bytes) * 100"
+    threshold: 85
+    condition: ">"
+    datasource:
+      name: "vmselect-instance-2"
+      url: "http://localhost:8080/api/v1/query"
+    export:
+      datastore: "file"
+      file:
+        path: "memory_usage_export.json"
+      action: "export"
+
+  - name: "disk_usage"
+    description: "Disk usage of the VM"
+    query: "avg(rate(vm_disk_io_time_seconds_total{device='sda'}[5m])) by (instance)"
     threshold: 75
     condition: ">"
-    action: "export"
-  - name: "disk_space"
-    threshold: 90
-    condition: "<"
-    action: "export"
+    datasource:
+      name: "vmselect-instance-1"
+      url: "http://localhost:8080/api/v1/query"
+    export:
+      datastore: "mysql"
+      mysql:
+        host: "localhost"
+        database: "metrics_database"
+        user: "root"
+        password: "password"
+      action: "export"
 
+  - name: "pvc_full"
+    description: "Persistent Volume Claim Usage"
+    query: "vm_kubernetes_pvc_usage_bytes{job='kubelet'} / vm_kubernetes_pvc_capacity_bytes{job='kubelet'} * 100"
+    threshold: 90
+    condition: ">"
+    datasource:
+      name: "vmselect-instance-2"
+      url: "http://localhost:8080/api/v1/query"
+    export:
+      datastore: "file"
+      file:
+        path: "pvc_usage_export.json"
+      action: "export"
+
+<<<<<<< HEAD
 # Export configuration
 export:
   datastore: "mysql"  # Can be 'mysql', 'postgres', or 'file'
@@ -99,6 +152,8 @@ rules:
         path: "pvc_usage_export.json"
       action: "export"
 
+=======
+>>>>>>> bcf29cec80e2cb6f37ccd768f8fcc63748557fcb
   - name: "network_traffic"
     description: "Network traffic of the VM"
     query: "sum(rate(vm_network_receive_bytes_total[5m])) by (instance)"
@@ -115,4 +170,7 @@ rules:
         user: "root"
         password: "password"
       action: "export"
+<<<<<<< HEAD
 >>>>>>> 04b41fa... updated files
+=======
+>>>>>>> bcf29cec80e2cb6f37ccd768f8fcc63748557fcb
