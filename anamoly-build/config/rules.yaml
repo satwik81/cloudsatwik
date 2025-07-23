@@ -1,103 +1,96 @@
-# Define common configurations for datasources and exports
 datasources:
   vmselect-instance-1:
-    url: "http://localhost:8481/select/0/prometheus/api/v1/query"  # URL of vmselect instance 1
-  vmselect-instance-2:
-    url: "http://localhost:8481/select/0/prometheus/api/v1/query"  # URL of vmselect instance 2
+    url: "http://localhost:8481/select/0/prometheus/api/v1/query"
 
 exports:
-  mysql:
-    host: "localhost"  # MySQL host
-    user: "root"  # MySQL user
-    password: "password"  # MySQL password
-    database: "metrics_database"  # MySQL database
-    port: 3306  # MySQL port, default is 3306
   victoriametrics:
-    url: "http://localhost:8080/insert/0/prometheus"  # URL of your VictoriaMetrics instance
-
+    url: "http://localhost:8480/insert/0/prometheus"
 
 rules:
-  - name: "cpu_utilization"
-    description: "CPU utilization of the VM"
-    query: "100 - avg(rate(vm_cpu_seconds_total{mode='idle'}[5m])) by (instance) * 100"
+  - name: "cpu_user_seconds"
+    description: "CPU time spent in user mode"
+    query: 'vm_node_cpu_seconds_total{mode="user", cpu="0", instance="node1"}'
     threshold: 0
     condition: ">"
     datasource:
-      name: "vmselect-instance-1"  # Reference the datasource defined above
+      name: "vmselect-instance-1"
     export:
       datastore: "victoriametrics"
-      # mysql:
-      #   host: "{{ exports.mysql.host }}"
-      #   user: "{{ exports.mysql.user }}"
-      #   password: "{{ exports.mysql.password }}"
-      #   database: "{{ exports.mysql.database }}"
-      #   port: "{{ exports.mysql.port }}"
-      # action: "export"
+      action: "export"
 
-  - name: "memory_usage"
-    description: "Memory usage of the VM"
-    query: "(vm_memory_usage_bytes / vm_memory_total_bytes) * 100"
+  - name: "cpu_idle_seconds"
+    description: "CPU idle time"
+    query: 'vm_node_cpu_seconds_total{mode="idle", cpu="0", instance="node1"}'
     threshold: 0
     condition: ">"
     datasource:
-      name: "vmselect-instance-2"  # Reference the datasource defined above
+      name: "vmselect-instance-1"
     export:
       datastore: "victoriametrics"
-      # mysql:
-      #   host: "{{ exports.mysql.host }}"
-      #   user: "{{ exports.mysql.user }}"
-      #   password: "{{ exports.mysql.password }}"
-      #   database: "{{ exports.mysql.database }}"
-      #   port: "{{ exports.mysql.port }}"
-      # action: "export"
+      action: "export"
 
-  - name: "disk_usage"
-    description: "Disk usage of the VM"
-    query: "avg(rate(vm_disk_io_time_seconds_total{device='sda'}[5m])) by (instance)"
+  - name: "memory_free_bytes"
+    description: "Amount of free memory"
+    query: 'vm_node_memory_MemFree_bytes{instance="node1"}'
     threshold: 0
     condition: ">"
     datasource:
-      name: "vmselect-instance-1"  # Reference the datasource defined above
+      name: "vmselect-instance-1"
     export:
       datastore: "victoriametrics"
-      # mysql:
-      #   host: "{{ exports.mysql.host }}"
-      #   user: "{{ exports.mysql.user }}"
-      #   password: "{{ exports.mysql.password }}"
-      #   database: "{{ exports.mysql.database }}"
-      #   port: "{{ exports.mysql.port }}"
-      # action: "export"
+      action: "export"
 
-  - name: "pvc_full"
-    description: "Persistent Volume Claim Usage"
-    query: "vm_kubernetes_pvc_usage_bytes{job='kubelet'} / vm_kubernetes_pvc_capacity_bytes{job='kubelet'} * 100"
+  - name: "http_requests_200"
+    description: "Number of successful HTTP requests"
+    query: 'vm_http_requests_total{code="200", method="GET", handler="/api/v1/query"}'
     threshold: 0
     condition: ">"
     datasource:
-      name: "vmselect-instance-2"  # Reference the datasource defined above
+      name: "vmselect-instance-1"
     export:
       datastore: "victoriametrics"
-      # mysql:
-      #   host: "{{ exports.mysql.host }}"
-      #   user: "{{ exports.mysql.user }}"
-      #   password: "{{ exports.mysql.password }}"
-      #   database: "{{ exports.mysql.database }}"
-      #   port: "{{ exports.mysql.port }}"
-      # action: "export"
+      action: "export"
 
-  - name: "network_traffic"
-    description: "Network traffic of the VM"
-    query: "sum(rate(vm_network_receive_bytes_total[5m])) by (instance)"
+  - name: "http_requests_500"
+    description: "Number of failed HTTP requests"
+    query: 'vm_http_requests_total{code="500", method="POST", handler="/api/v1/import"}'
     threshold: 0
     condition: ">"
     datasource:
-      name: "vmselect-instance-1"  # Reference the datasource defined above
+      name: "vmselect-instance-1"
     export:
       datastore: "victoriametrics"
-      # mysql:
-      #   host: "{{ exports.mysql.host }}"
-      #   user: "{{ exports.mysql.user }}"
-      #   password: "{{ exports.mysql.password }}"
-      #   database: "{{ exports.mysql.database }}"
-      #   port: "{{ exports.mysql.port }}"
-      # action: "export"
+      action: "export"
+
+  - name: "http_request_duration_count"
+    description: "Count of HTTP request durations"
+    query: 'vm_http_request_duration_seconds_count{method="GET", handler="/"}'
+    threshold: 0
+    condition: ">"
+    datasource:
+      name: "vmselect-instance-1"
+    export:
+      datastore: "victoriametrics"
+      action: "export"
+
+  - name: "http_request_duration_sum"
+    description: "Total time of all HTTP requests"
+    query: 'vm_http_request_duration_seconds_sum{method="GET", handler="/"}'
+    threshold: 0
+    condition: ">"
+    datasource:
+      name: "vmselect-instance-1"
+    export:
+      datastore: "victoriametrics"
+      action: "export"
+
+  - name: "disk_io_time_seconds"
+    description: "Total disk I/O time for device sda"
+    query: 'vm_disk_io_time_seconds_total{device="sda", instance="node1"}'
+    threshold: 0
+    condition: ">"
+    datasource:
+      name: "vmselect-instance-1"
+    export:
+      datastore: "victoriametrics"
+      action: "export"
