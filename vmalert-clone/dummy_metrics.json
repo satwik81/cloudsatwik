@@ -1,0 +1,79 @@
+[
+  {
+    "description": "CPU usage of the VM (user mode)",
+    "metric": {
+      "instance": "host1",
+      "mode": "user"
+    },
+    "name": "cpu_usage",
+    "time": "2025-07-23T08:30:00+05:30",
+    "value": 75
+  },
+  {
+    "description": "CPU usage of the VM (system mode)",
+    "metric": {
+      "instance": "host1",
+      "mode": "system"
+    },
+    "name": "cpu_usage",
+    "time": "2025-07-23T08:30:00+05:30",
+    "value": 15
+  },
+  {
+    "description": "CPU usage of the VM (idle mode)",
+    "metric": {
+      "instance": "host1",
+      "mode": "idle"
+    },
+    "name": "cpu_usage",
+    "time": "2025-07-23T08:30:00+05:30",
+    "value": 10
+  },
+  {
+    "description": "Memory usage of the VM",
+    "metric": {
+      "instance": "host1"
+    },
+    "name": "memory_usage",
+    "time": "2025-07-23T08:30:00+05:30",
+    "value": 512
+  },
+  {
+    "description": "Disk usage of the VM",
+    "metric": {
+      "instance": "host1",
+      "device": "sda"
+    },
+    "name": "disk_usage",
+    "time": "2025-07-23T08:30:00+05:30",
+    "value": 50
+  },
+  {
+    "description": "Network traffic of the VM",
+    "metric": {
+      "instance": "host1"
+    },
+    "name": "network_traffic",
+    "time": "2025-07-23T08:30:00+05:30",
+    "value": 6000000
+  },
+  {
+    "description": "Persistent Volume Claim (PVC) usage",
+    "metric": {
+      "instance": "host1",
+      "job": "kubelet"
+    },
+    "name": "pvc_usage",
+    "time": "2025-07-23T08:30:00+05:30",
+    "value": 800000000
+  },
+  {
+    "description": "Custom test metric for alerting",
+    "metric": {
+      "env": "dev"
+    },
+    "name": "custom_test_metric",
+    "time": "2025-07-23T08:30:00+05:30",
+    "value": 99
+  }
+]
