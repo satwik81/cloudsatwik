@@ -25,14 +25,14 @@ rules:
     datasource:
       name: "vmselect-instance-1"  # Reference the datasource defined above
     export:
-      datastore: "mysql"
-      mysql:
-        host: "{{ exports.mysql.host }}"
-        user: "{{ exports.mysql.user }}"
-        password: "{{ exports.mysql.password }}"
-        database: "{{ exports.mysql.database }}"
-        port: "{{ exports.mysql.port }}"
-      action: "export"
+      datastore: "victoriametrics"
+      # mysql:
+      #   host: "{{ exports.mysql.host }}"
+      #   user: "{{ exports.mysql.user }}"
+      #   password: "{{ exports.mysql.password }}"
+      #   database: "{{ exports.mysql.database }}"
+      #   port: "{{ exports.mysql.port }}"
+      # action: "export"
 
   - name: "memory_usage"
     description: "Memory usage of the VM"
