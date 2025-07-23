@@ -42,14 +42,14 @@ rules:
     datasource:
       name: "vmselect-instance-2"  # Reference the datasource defined above
     export:
-      datastore: "mysql"
-      mysql:
-        host: "{{ exports.mysql.host }}"
-        user: "{{ exports.mysql.user }}"
-        password: "{{ exports.mysql.password }}"
-        database: "{{ exports.mysql.database }}"
-        port: "{{ exports.mysql.port }}"
-      action: "export"
+      datastore: "victoriametrics"
+      # mysql:
+      #   host: "{{ exports.mysql.host }}"
+      #   user: "{{ exports.mysql.user }}"
+      #   password: "{{ exports.mysql.password }}"
+      #   database: "{{ exports.mysql.database }}"
+      #   port: "{{ exports.mysql.port }}"
+      # action: "export"
 
   - name: "disk_usage"
     description: "Disk usage of the VM"
@@ -59,14 +59,14 @@ rules:
     datasource:
       name: "vmselect-instance-1"  # Reference the datasource defined above
     export:
-      datastore: "mysql"
-      mysql:
-        host: "{{ exports.mysql.host }}"
-        user: "{{ exports.mysql.user }}"
-        password: "{{ exports.mysql.password }}"
-        database: "{{ exports.mysql.database }}"
-        port: "{{ exports.mysql.port }}"
-      action: "export"
+      datastore: "victoriametrics"
+      # mysql:
+      #   host: "{{ exports.mysql.host }}"
+      #   user: "{{ exports.mysql.user }}"
+      #   password: "{{ exports.mysql.password }}"
+      #   database: "{{ exports.mysql.database }}"
+      #   port: "{{ exports.mysql.port }}"
+      # action: "export"
 
   - name: "pvc_full"
     description: "Persistent Volume Claim Usage"
@@ -76,14 +76,14 @@ rules:
     datasource:
       name: "vmselect-instance-2"  # Reference the datasource defined above
     export:
-      datastore: "mysql"
-      mysql:
-        host: "{{ exports.mysql.host }}"
-        user: "{{ exports.mysql.user }}"
-        password: "{{ exports.mysql.password }}"
-        database: "{{ exports.mysql.database }}"
-        port: "{{ exports.mysql.port }}"
-      action: "export"
+      datastore: "victoriametrics"
+      # mysql:
+      #   host: "{{ exports.mysql.host }}"
+      #   user: "{{ exports.mysql.user }}"
+      #   password: "{{ exports.mysql.password }}"
+      #   database: "{{ exports.mysql.database }}"
+      #   port: "{{ exports.mysql.port }}"
+      # action: "export"
 
   - name: "network_traffic"
     description: "Network traffic of the VM"
@@ -93,11 +93,11 @@ rules:
     datasource:
       name: "vmselect-instance-1"  # Reference the datasource defined above
     export:
-      datastore: "mysql"
-      mysql:
-        host: "{{ exports.mysql.host }}"
-        user: "{{ exports.mysql.user }}"
-        password: "{{ exports.mysql.password }}"
-        database: "{{ exports.mysql.database }}"
-        port: "{{ exports.mysql.port }}"
-      action: "export"
+      datastore: "victoriametrics"
+      # mysql:
+      #   host: "{{ exports.mysql.host }}"
+      #   user: "{{ exports.mysql.user }}"
+      #   password: "{{ exports.mysql.password }}"
+      #   database: "{{ exports.mysql.database }}"
+      #   port: "{{ exports.mysql.port }}"
+      # action: "export"
