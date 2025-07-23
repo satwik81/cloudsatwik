@@ -31,7 +31,7 @@ rules:
       name: "vmselect-instance-2"
       url: "http://localhost:8481/select/0/prometheus/api/v1/query"  # URL of vmselect instance 2
     export:
-      datastore: "file"
+      datastore: "mysql"
       file:
         path: "memory_usage_export.json"  # File path for export
       action: "export"
@@ -62,7 +62,7 @@ rules:
       name: "vmselect-instance-2"
       url: "http://localhost:8481/select/0/prometheus/api/v1/query"  # URL of vmselect instance 2
     export:
-      datastore: "file"
+      datastore: "mysql"
       file:
         path: "pvc_usage_export.json"  # File path for export
       action: "export"
