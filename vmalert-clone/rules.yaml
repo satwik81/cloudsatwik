@@ -6,14 +6,14 @@ rules:
     condition: ">"
     datasource:
       name: "vmselect-instance-1"
-      url: "http://localhost:8481/api/v1/query"
+      url: "http://localhost:8481/api/v1/query"  # URL of vmselect instance 1
     export:
       datastore: "mysql"
       mysql:
-        host: "localhost"
-        user: "root"
-        password: "password"
-        database: "metrics_database"
+        host: "localhost"  # MySQL host
+        user: "root"  # MySQL user
+        password: "password"  # MySQL password
+        database: "metrics_database"  # MySQL database
       action: "export"
 
   - name: "memory_usage"
@@ -23,11 +23,11 @@ rules:
     condition: ">"
     datasource:
       name: "vmselect-instance-2"
-      url: "http://localhost:8481/api/v1/query"
+      url: "http://localhost:8481/api/v1/query"  # URL of vmselect instance 2
     export:
       datastore: "file"
       file:
-        path: "memory_usage_export.json"
+        path: "memory_usage_export.json"  # File path for export
       action: "export"
 
   - name: "disk_usage"
@@ -37,14 +37,14 @@ rules:
     condition: ">"
     datasource:
       name: "vmselect-instance-1"
-      url: "http://localhost:8481/api/v1/query"
+      url: "http://localhost:8481/api/v1/query"  # URL of vmselect instance 1
     export:
       datastore: "mysql"
       mysql:
-        host: "localhost"
-        user: "root"
-        password: "password"
-        database: "metrics_database"
+        host: "localhost"  # MySQL host
+        user: "root"  # MySQL user
+        password: "password"  # MySQL password
+        database: "metrics_database"  # MySQL database
       action: "export"
 
   - name: "pvc_full"
@@ -54,11 +54,11 @@ rules:
     condition: ">"
     datasource:
       name: "vmselect-instance-2"
-      url: "http://localhost:8481/api/v1/query"
+      url: "http://localhost:8481/api/v1/query"  # URL of vmselect instance 2
     export:
       datastore: "file"
       file:
-        path: "pvc_usage_export.json"
+        path: "pvc_usage_export.json"  # File path for export
       action: "export"
 
   - name: "network_traffic"
@@ -68,12 +68,12 @@ rules:
     condition: ">"
     datasource:
       name: "vmselect-instance-1"
-      url: "http://localhost:8481/api/v1/query"
+      url: "http://localhost:8481/api/v1/query"  # URL of vmselect instance 1
     export:
       datastore: "mysql"
       mysql:
-        host: "localhost:3306"
-        user: "root"
-        password: "password"
-        database: "metrics_database"
+        host: "localhost:3306"  # MySQL host with port
+        user: "root"  # MySQL user
+        password: "password"  # MySQL password
+        database: "metrics_database"  # MySQL database
       action: "export"
