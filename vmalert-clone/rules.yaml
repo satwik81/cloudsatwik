@@ -6,7 +6,7 @@ rules:
     condition: ">"
     datasource:
       name: "vmselect-instance-1"
-      url: "http://localhost:8428/api/v1/query"
+      url: "http://localhost:8481/api/v1/query"
     export:
       datastore: "mysql"
       mysql:
@@ -23,7 +23,7 @@ rules:
     condition: ">"
     datasource:
       name: "vmselect-instance-2"
-      url: "http://localhost:8428/api/v1/query"
+      url: "http://localhost:8481/api/v1/query"
     export:
       datastore: "file"
       file:
@@ -37,7 +37,7 @@ rules:
     condition: ">"
     datasource:
       name: "vmselect-instance-1"
-      url: "http://localhost:8428/api/v1/query"
+      url: "http://localhost:8481/api/v1/query"
     export:
       datastore: "mysql"
       mysql:
@@ -54,7 +54,7 @@ rules:
     condition: ">"
     datasource:
       name: "vmselect-instance-2"
-      url: "http://localhost:8428/api/v1/query"
+      url: "http://localhost:8481/api/v1/query"
     export:
       datastore: "file"
       file:
@@ -68,7 +68,7 @@ rules:
     condition: ">"
     datasource:
       name: "vmselect-instance-1"
-      url: "http://localhost:8428/api/v1/query"
+      url: "http://localhost:8481/api/v1/query"
     export:
       datastore: "mysql"
       mysql:
