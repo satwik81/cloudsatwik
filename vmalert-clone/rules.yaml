@@ -32,8 +32,11 @@ rules:
       url: "http://localhost:8481/select/0/prometheus/api/v1/query"  # URL of vmselect instance 2
     export:
       datastore: "mysql"
-      file:
-        path: "memory_usage_export.json"  # File path for export
+      mysql:
+        host: "localhost"  # MySQL host
+        user: "root"  # MySQL user
+        password: "password"  # MySQL password
+        database: "metrics_database"  # MySQL database
       action: "export"
 
   - name: "disk_usage"
@@ -63,8 +66,11 @@ rules:
       url: "http://localhost:8481/select/0/prometheus/api/v1/query"  # URL of vmselect instance 2
     export:
       datastore: "mysql"
-      file:
-        path: "pvc_usage_export.json"  # File path for export
+      mysql:
+        host: "localhost"  # MySQL host
+        user: "root"  # MySQL user
+        password: "password"  # MySQL password
+        database: "metrics_database"  # MySQL database
       action: "export"
 
   - name: "network_traffic"
