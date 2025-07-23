@@ -1,3 +1,9 @@
+# exporters:
+#   mysql_db:
+#      #details
+#   filestore:
+#     #details
+  
 rules:
   - name: "cpu_utilization"
     description: "CPU utilization of the VM"
