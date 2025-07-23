@@ -1,3 +1,8 @@
+import sys
+import os
+
+# Add the libs folder to the Python path
+sys.path.append(os.path.join(os.path.dirname(__file__), 'libs'))
 from libs.config_loader import load_config
 from libs.prometheus_query import query_prometheus
 from libs.mysql_exporter import export_to_mysql
