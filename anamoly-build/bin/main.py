@@ -2,6 +2,7 @@ from libs.config_loader import load_config
 from libs.prometheus_query import query_prometheus
 from libs.mysql_exporter import export_to_mysql
 from libs.file_exporter import export_to_file
+from libs.victoria_export import export_to_victoriametrics
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -28,6 +29,8 @@ def main():
                 export_to_mysql(rule, value, exports)
             elif export_type == "file":
                 export_to_file(rule, value)
+            else:
+                export_to_victoriametrics(rule, value, exports)
         else:
             logging.info(f"Rule not triggered: {rule['name']} with value {value}")
 
