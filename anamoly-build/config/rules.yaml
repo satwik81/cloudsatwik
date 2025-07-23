@@ -1,0 +1,100 @@
+# Define common configurations for datasources and exports
+datasources:
+  vmselect-instance-1:
+    url: "http://localhost:8481/select/0/prometheus/api/v1/query"  # URL of vmselect instance 1
+  vmselect-instance-2:
+    url: "http://localhost:8481/select/0/prometheus/api/v1/query"  # URL of vmselect instance 2
+
+exports:
+  mysql:
+    host: "localhost"  # MySQL host
+    user: "root"  # MySQL user
+    password: "password"  # MySQL password
+    database: "metrics_database"  # MySQL database
+    port: 3306  # MySQL port, default is 3306
+
+rules:
+  - name: "cpu_utilization"
+    description: "CPU utilization of the VM"
+    query: "100 - avg(rate(vm_cpu_seconds_total{mode='idle'}[5m])) by (instance) * 100"
+    threshold: 0
+    condition: ">"
+    datasource:
+      name: "vmselect-instance-1"  # Reference the datasource defined above
+    export:
+      datastore: "mysql"
+      mysql:
+        host: "{{ exports.mysql.host }}"
+        user: "{{ exports.mysql.user }}"
+        password: "{{ exports.mysql.password }}"
+        database: "{{ exports.mysql.database }}"
+        port: "{{ exports.mysql.port }}"
+      action: "export"
+
+  - name: "memory_usage"
+    description: "Memory usage of the VM"
+    query: "(vm_memory_usage_bytes / vm_memory_total_bytes) * 100"
+    threshold: 0
+    condition: ">"
+    datasource:
+      name: "vmselect-instance-2"  # Reference the datasource defined above
+    export:
+      datastore: "mysql"
+      mysql:
+        host: "{{ exports.mysql.host }}"
+        user: "{{ exports.mysql.user }}"
+        password: "{{ exports.mysql.password }}"
+        database: "{{ exports.mysql.database }}"
+        port: "{{ exports.mysql.port }}"
+      action: "export"
+
+  - name: "disk_usage"
+    description: "Disk usage of the VM"
+    query: "avg(rate(vm_disk_io_time_seconds_total{device='sda'}[5m])) by (instance)"
+    threshold: 0
+    condition: ">"
+    datasource:
+      name: "vmselect-instance-1"  # Reference the datasource defined above
+    export:
+      datastore: "mysql"
+      mysql:
+        host: "{{ exports.mysql.host }}"
+        user: "{{ exports.mysql.user }}"
+        password: "{{ exports.mysql.password }}"
+        database: "{{ exports.mysql.database }}"
+        port: "{{ exports.mysql.port }}"
+      action: "export"
+
+  - name: "pvc_full"
+    description: "Persistent Volume Claim Usage"
+    query: "vm_kubernetes_pvc_usage_bytes{job='kubelet'} / vm_kubernetes_pvc_capacity_bytes{job='kubelet'} * 100"
+    threshold: 0
+    condition: ">"
+    datasource:
+      name: "vmselect-instance-2"  # Reference the datasource defined above
+    export:
+      datastore: "mysql"
+      mysql:
+        host: "{{ exports.mysql.host }}"
+        user: "{{ exports.mysql.user }}"
+        password: "{{ exports.mysql.password }}"
+        database: "{{ exports.mysql.database }}"
+        port: "{{ exports.mysql.port }}"
+      action: "export"
+
+  - name: "network_traffic"
+    description: "Network traffic of the VM"
+    query: "sum(rate(vm_network_receive_bytes_total[5m])) by (instance)"
+    threshold: 0
+    condition: ">"
+    datasource:
+      name: "vmselect-instance-1"  # Reference the datasource defined above
+    export:
+      datastore: "mysql"
+      mysql:
+        host: "{{ exports.mysql.host }}"
+        user: "{{ exports.mysql.user }}"
+        password: "{{ exports.mysql.password }}"
+        database: "{{ exports.mysql.database }}"
+        port: "{{ exports.mysql.port }}"
+      action: "export"
