@@ -4,7 +4,7 @@ datasources:
 
 exports:
   victoriametrics:
-    url: "http://localhost:8480/insert/0/prometheus"
+    url: "http://localhost:8888/insert/0/prometheus"
 
 rules:
   - name: "cpu_user_seconds"
