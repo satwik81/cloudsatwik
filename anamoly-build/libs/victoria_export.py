@@ -40,7 +40,7 @@ def export_to_victoriametrics(rule, value, exports):
             "Content-Type": "application/x-protobuf"
         }
 
-        response = requests.post(f'{vm_config["url"]}/api/v1/write', data=data.encode('utf-8'), headers=headers)
+        response = requests.post(f'{vm_config["url"]}', data=data.encode('utf-8'), headers=headers)
 
         if response.status_code == 200:
             print(f"Exported to VMCluster: {rule['name']} - value: {value}")
