@@ -18,9 +18,9 @@ def export_to_victoriametrics(rule, value, exports):
         response = requests.post(f'{vm_config["url"]}', data=data, headers=headers)
 
         if response.status_code==200:
-            print(f"Exported to VictoriaMetrics: {rule['name']} - value: {value}")
+            print(f"✅ Exported to VictoriaMetrics: {rule['name']} - value: {value}")
         else:
-            print(f"Failed to export data to VictoriaMetrics: {response.status_code} - {response.text}")
+            print(f"❌ Failed to export data to VictoriaMetrics: {response.status_code} - {response.text}")
             
     except Exception as e:
-        print(f" Error exporting to VictoriaMetrics: {e}")
+        print(f"⚠️ Error exporting to VictoriaMetrics: {e}")
