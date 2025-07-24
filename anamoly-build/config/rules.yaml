@@ -5,6 +5,12 @@ datasources:
 exports:
   victoriametrics:
     url: "http://localhost:8888/insert/0/prometheus"
+  mysql:
+    host: "localhost"  # MySQL host
+    user: "root"  # MySQL user
+    password: "password"  # MySQL password
+    database: "metrics_database"  # MySQL database
+    port: 3306  # MySQL port, default is 3306
 
 rules:
   - name: "cpu_user_seconds"
@@ -15,7 +21,13 @@ rules:
     datasource:
       name: "vmselect-instance-1"
     export:
-      datastore: "victoriametrics"
+      datastore: "mysql"
+      mysql:
+        host: "{{ exports.mysql.host }}"
+        user: "{{ exports.mysql.user }}"
+        password: "{{ exports.mysql.password }}"
+        database: "{{ exports.mysql.database }}"
+        port: "{{ exports.mysql.port }}"
       action: "export"
 
   - name: "cpu_idle_seconds"
