@@ -23,4 +23,4 @@ def export_to_victoriametrics(rule, value, exports):
             print(f"Failed to export data to VictoriaMetrics: {response.status_code} - {response.text}")
             
     except Exception as e:
-        print(f"⚠️ Error exporting to VictoriaMetrics: {e}")
+        print(f" Error exporting to VictoriaMetrics: {e}")
