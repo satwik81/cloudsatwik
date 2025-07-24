@@ -17,7 +17,7 @@ def export_to_victoriametrics(rule, value, exports):
         headers = {"Content-Type": "text/plain"}
         response = requests.post(f'{vm_config["url"]}/api/v1/import/prometheus', data=data)
 
-        if response.status_code==200:
+        if response.status_code in (200,204):
             print(f"✅ Exported to VictoriaMetrics: {rule['name']} - value: {value}")
         else:
             print(f"❌ Failed to export data to VictoriaMetrics: {response.status_code} - {response.text}")
