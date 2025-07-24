@@ -1,50 +1,26 @@
 import requests
-from datetime import time
-import time
+from datetime import datetime
 
 def export_to_victoriametrics(rule, value, exports):
     vm_config = exports["victoriametrics"]
 
-    # try:
-    #     # Add dummy labels if none are defined
-    #     labels = rule.get("labels", {"source": "custom_export"})
-
-    #     # Build the Prometheus line format: metric{label="value"} value timestamp(ms)
-    #     label_str = ",".join([f'{k}="{v}"' for k, v in labels.items()])
-    #     timestamp_ms = int(datetime.utcnow().timestamp() * 1000)
-    #     data = f'{rule["name"]}{{{label_str}}} {value} {timestamp_ms}\n'
-
-    #     # Send to VictoriaMetrics
-    #     headers = {"Content-Type": "text/plain"}
-    #     response = requests.post(f'{vm_config["url"]}/api/v1/write', data=data, headers=headers)
-
-    #     if response.status_code==200:
-    #         print(f"Exported to VictoriaMetrics: {rule['name']} - value: {value}")
-    #     else:
-    #         print(f"Failed to export data to VictoriaMetrics: {response.status_code} - {response.text}")
-            
-    # except Exception as e:
-    #     print(f" Error exporting to VictoriaMetrics: {e}")
-
     try:
-        # Create labels if none are defined
+        # Add dummy labels if none are defined
         labels = rule.get("labels", {"source": "custom_export"})
 
-        # Build the Prometheus line format: metric{label="value"} value timestamp
+        # Build the Prometheus line format: metric{label="value"} value timestamp(ms)
         label_str = ",".join([f'{k}="{v}"' for k, v in labels.items()])
-        timestamp_ms = int(time.time() * 1000)  # Current timestamp in milliseconds
+        timestamp_ms = int(datetime.utcnow().timestamp() * 1000)
         data = f'{rule["name"]}{{{label_str}}} {value} {timestamp_ms}\n'
 
-        # Send to VictoriaMetrics (VMCluster) remote write endpoint
-        headers = {
-            "Content-Type": "application/x-protobuf"
-        }
+        # Send to VictoriaMetrics
+        headers = {"Content-Type": "text/plain"}
+        response = requests.post(f'{vm_config["url"]}', data=data, headers=headers)
 
-        response = requests.post(f'{vm_config["url"]}', data=data.encode('utf-8'), headers=headers)
-
-        if response.status_code == 200:
-            print(f"Exported to VMCluster: {rule['name']} - value: {value}")
+        if response.status_code==200:
+            print(f"Exported to VictoriaMetrics: {rule['name']} - value: {value}")
         else:
-            print(f"Failed to export data to VMCluster: {response.status_code} - {response.text}")
+            print(f"Failed to export data to VictoriaMetrics: {response.status_code} - {response.text}")
+            
     except Exception as e:
-        print(f"Error exporting to VMCluster: {e}")
+        print(f" Error exporting to VictoriaMetrics: {e}")
