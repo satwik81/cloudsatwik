@@ -1,5 +1,6 @@
 import requests
 from datetime import time
+import time
 
 def export_to_victoriametrics(rule, value, exports):
     vm_config = exports["victoriametrics"]
