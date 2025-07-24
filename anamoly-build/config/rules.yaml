@@ -38,7 +38,7 @@ rules:
   - name: "cpu_usage_percentage_host1_cpu0"
     description: "CPU usage percentage for server1, CPU 0"
     query: 'cpu_usage_percentage{host="server1", cpu="0"}'
-    threshold: 0
+    threshold: 100
     condition: ">"
     datasource:
       name: "vmselect-instance-1"
@@ -49,7 +49,7 @@ rules:
   - name: "cpu_usage_percentage_host1_cpu1"
     description: "CPU usage percentage for server1, CPU 1"
     query: 'cpu_usage_percentage{host="server1", cpu="1"}'
-    threshold: 0
+    threshold: 100
     condition: ">"
     datasource:
       name: "vmselect-instance-1"
@@ -60,7 +60,7 @@ rules:
   - name: "disk_usage_bytes_sda1"
     description: "Disk usage in bytes for device /dev/sda1"
     query: 'disk_usage_bytes{device="/dev/sda1", mount_point="/"}'
-    threshold: 0
+    threshold: 100
     condition: ">"
     datasource:
       name: "vmselect-instance-1"
@@ -71,7 +71,7 @@ rules:
   - name: "temperature_office_sensor1"
     description: "Temperature in the office measured by sensor1"
     query: 'temperature{sensor="sensor1", location="office"}'
-    threshold: 0
+    threshold: 100
     condition: ">"
     datasource:
       name: "vmselect-instance-1"
@@ -82,7 +82,7 @@ rules:
   - name: "temperature_server_room_sensor2"
     description: "Temperature in the server room measured by sensor2"
     query: 'temperature{sensor="sensor2", location="server-room"}'
-    threshold: 0
+    threshold: 100
     condition: ">"
     datasource:
       name: "vmselect-instance-1"
@@ -93,7 +93,7 @@ rules:
   - name: "request_duration_seconds_bucket_0_1"
     description: "Request duration histogram bucket for <= 0.1 seconds"
     query: 'request_duration_seconds_bucket{le="0.1"}'
-    threshold: 0
+    threshold: 0.1
     condition: ">"
     datasource:
       name: "vmselect-instance-1"
