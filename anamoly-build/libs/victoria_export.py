@@ -7,9 +7,10 @@ def export_to_victoriametrics(rule, value, exports):
     vm_config = exports["victoriametrics"]
 
     try:
+        labels = rule.get("labels", {"source": "custom_export"})
         # Create a registry and a gauge metric
         registry = CollectorRegistry()
-        gauge = Gauge(rule["name"], rule["description"], labelnames=["source"], registry=registry)
+        gauge = Gauge(rule["name"], rule["description"], labelnames=labels.keys(), registry=registry)
 
         # Set the value with the label (ensure it is 'source' or custom label as needed)
         gauge.labels(source=rule["labels"].get("source", "custom_export")).set(value)
