@@ -4,7 +4,7 @@ datasources:
 
 exports:
   victoriametrics:
-    url: "http://localhost:8888/insert/0/prometheus"
+    url: "http://localhost:8888/insert/0/prometheus/api/v1/import/prometheus"
   mysql:
     host: "localhost"  # MySQL host
     user: "root"  # MySQL user
