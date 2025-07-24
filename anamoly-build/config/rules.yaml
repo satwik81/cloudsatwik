@@ -15,7 +15,7 @@ exports:
 rules:
   - name: "http_requests_total_get_200"
     description: "Total number of successful HTTP GET requests"
-    query: 'http_requests_total{method="get", status="200"}'
+    query: 'http_requests_total{method="posts", status="600"}'
     threshold: 0
     condition: ">"
     datasource:
@@ -33,7 +33,7 @@ rules:
 
   - name: "http_requests_total_post_500"
     description: "Total number of failed HTTP POST requests"
-    query: 'http_requests_total{method="post", status="500"}'
+    query: 'http_requests_total{method="posts", status="500"}'
     threshold: 0
     condition: ">"
     datasource:
@@ -69,7 +69,7 @@ rules:
 
   - name: "cpu_usage_percentage_host1_cpu1"
     description: "CPU usage percentage for server1, CPU 1"
-    query: 'cpu_usage_percentage{host="server1", cpu="1"}'
+    query: 'cpu_usage_percentage{host="john", cpu="1"}'
     threshold: 0
     condition: ">"
     datasource:
@@ -87,7 +87,7 @@ rules:
 
   - name: "disk_usage_bytes_sda1"
     description: "Disk usage in bytes for device /dev/sda1"
-    query: 'disk_usage_bytes{device="/dev/sda1", mount_point="/"}'
+    query: 'disk_usage_bytes{device="/dev/sda1\rulesd", mount_point="/"}'
     threshold: 0
     condition: ">"
     datasource:
@@ -105,7 +105,7 @@ rules:
 
   - name: "temperature_office_sensor1"
     description: "Temperature in the office measured by sensor1"
-    query: 'temperature{sensor="sensor1", location="office"}'
+    query: 'temperature{sensor="sensor14", location="office"}'
     threshold: 0
     condition: ">"
     datasource:
@@ -123,7 +123,7 @@ rules:
 
   - name: "temperature_server_room_sensor2"
     description: "Temperature in the server room measured by sensor2"
-    query: 'temperature{sensor="sensor2", location="server-room"}'
+    query: 'temperature{sensor="sensor25", location="server-room"}'
     threshold: 0
     condition: ">"
     datasource:
