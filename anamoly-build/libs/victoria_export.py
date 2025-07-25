@@ -29,18 +29,18 @@ def export_to_victoriametrics(rule, value, exports):
         print(f"Unexpected error: {e}")
 
 # Example Usage
-if __name__ == "__main__":
-    # Example rule with name and labels
-    rule = {
-        "name": "my_custom_metric",
-        "labels": {"source": "custom_export", "host": "my_host", "region": "us-west-1"}
-    }
+# if __name__ == "__main__":
+#     # Example rule with name and labels
+#     rule = {
+#         "name": "my_custom_metric",
+#         "labels": {"source": "custom_export", "host": "my_host", "region": "us-west-1"}
+#     }
 
-    value = 123.45  # Metric value
-    exports = {
-        "victoriametrics": {
-            "url": "http://your-vminsert-instance:8480"  # Change to your vminsert endpoint
-        }
-    }
+#     value = 123.45  # Metric value
+#     exports = {
+#         "victoriametrics": {
+#             "url": "http://your-vminsert-instance:8480"  # Change to your vminsert endpoint
+#         }
+#     }
     
-    export_to_victoriametrics(rule, value, exports)
+#     export_to_victoriametrics(rule, value, exports)
