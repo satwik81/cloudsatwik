@@ -15,7 +15,7 @@ def export_to_victoriametrics(rule, value, exports):
         
         # Send to VictoriaMetrics (vminsert endpoint)
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}  # Raw data format
-        response = requests.post(f"{vm_config['url']}/insert", headers=headers, data=data)
+        response = requests.post(f"{vm_config['url']}", headers=headers, data=data)
         
         # Check the response from VictoriaMetrics
         if response.status_code == 200:
