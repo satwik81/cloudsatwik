@@ -16,7 +16,7 @@ def export_to_victoriametrics(rule, value, exports):
 
         # Send to VictoriaMetrics
         headers = {"Content-Type": "application/json"}
-        response = requests.post(f'{vm_config["url"]}', data=json.dumps(data))
+        response = requests.post(f'{vm_config["url"]}', headers=headers, data=json.dumps(data))
 
         if response.status_code == 200:
             print(f"Exported to VictoriaMetrics: {rule['name']} - value: {value}")
