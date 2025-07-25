@@ -1,5 +1,6 @@
 import requests
 from datetime import datetime
+import json
 
 def export_to_victoriametrics(rule, value, exports):
     vm_config = exports["victoriametrics"]
@@ -14,8 +15,8 @@ def export_to_victoriametrics(rule, value, exports):
         data = f'{rule["name"]}{{{label_str}}} {value} {timestamp_ms}\n'
 
         # Send to VictoriaMetrics
-        headers = {"Content-Type": "text/plain"}
-        response = requests.post(f'{vm_config["url"]}', data=data)
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(f'{vm_config["url"]}', data=json.dumps(data))
 
         if response.status_code == 200:
             print(f"Exported to VictoriaMetrics: {rule['name']} - value: {value}")
