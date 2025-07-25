@@ -12,7 +12,7 @@ def export_to_victoriametrics(rule, value, exports):
         # Build the Prometheus line format: metric{label="value"} value timestamp(ms)
         label_str = ",".join([f'{k}="{v}"' for k, v in labels.items()])
         timestamp_ms = int(datetime.utcnow().timestamp() * 1000)
-        data = f'{rule['name']}{{{label_str}}} {value} {timestamp_ms}\n'
+        data = f'{rule["name"]}{{{label_str}}} {value} {timestamp_ms}\n'
 
         # Send to VictoriaMetrics
         headers = {'Content-Type': 'application/json'}
