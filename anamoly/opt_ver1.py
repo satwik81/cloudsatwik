@@ -52,7 +52,7 @@ def export_to_victoriametrics(alert_name, expr, results, push_url):
         logging.error(f"Export failed for {alert_name}: {e}")
 
 def main():
-    config = load_config("config.yml")
+    config = load_config("anamoly/config.yml")
     datasource_url = config["datasource"]["url"]
     push_url = config["datasource"]["push_url"]
     groups = config.get("groups", [])
