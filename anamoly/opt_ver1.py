@@ -2,7 +2,14 @@ import requests
 import yaml
 import logging
 import time
+import sys
+import os
+print("PYTHONPATH:", sys.path)
+# Add the libs folder to the Python path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
+# Add the full path to the libs directory
+sys.path.append(os.path.join(project_root))
 logging.basicConfig(level=logging.INFO)
 
 def load_config(file_path):
