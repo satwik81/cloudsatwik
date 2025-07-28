@@ -205,7 +205,7 @@ securityContext:
 
 service:
   # -- Enable agent service
-  enabled: false
+  enabled: true
   # -- Service annotations
   annotations: {}
   # -- Service labels
