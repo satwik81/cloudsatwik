@@ -1,10 +1,11 @@
 datasource:
   name: victoria
   url: http://localhost:8481/select/0/prometheus/api/v1/query
-  push_url: http://localhost:8888/insert/0/prometheus/api/v1/import/prometheus
+  
 
 export:
   datastore: victoriametrics
+  push_url: http://localhost:8888/insert/0/prometheus/api/v1/import/prometheus
 
 groups:
   - name: vm_metrics_group

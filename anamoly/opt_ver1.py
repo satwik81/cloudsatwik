@@ -54,7 +54,7 @@ def export_to_victoriametrics(alert_name, expr, results, push_url):
 def main():
     config = load_config("config.yaml")
     datasource_url = config["datasource"]["url"]
-    push_url = config["datasource"]["push_url"]
+    push_url = config["export"]["push_url"]
     groups = config.get("groups", [])
 
     for group in groups:
