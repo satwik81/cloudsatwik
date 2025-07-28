@@ -4,7 +4,6 @@ import logging
 import time
 import sys
 import os
-print("PYTHONPATH:", sys.path)
 # Add the libs folder to the Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
