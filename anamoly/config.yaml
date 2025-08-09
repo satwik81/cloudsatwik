@@ -1,28 +1,103 @@
 datasource:
   name: victoria
   url: http://localhost:8481/select/0/prometheus/api/v1/query
-  push_url: http://localhost:8888/insert/0/prometheus/api/v1/import/prometheus
+  
 
 export:
   datastore: victoriametrics
+  push_url: http://localhost:8888/insert/0/prometheus/api/v1/import/prometheus
 
 groups:
-  - name: default_group
+  - name: vm_metrics_group
     rules:
-      - alert: HighRowsInserted
-        expr: vm_rows_inserted_total
+      # High Memory Usage on VM
+      - alert: HighMemoryUsage
+        expr: vm_memory_usage_bytes / vm_memory_total_bytes * 100 > 0  # Always triggers
         for: 1m
         labels:
           severity: high
         annotations:
-          description: "Check if vm_rows_inserted_total is high"
+          description: "Memory usage exceeds 0% of the total memory"
 
-      - alert: MemoryUsage
-        expr: vm_memory_usage_bytes
+      # High CPU Usage on VM
+      - alert: HighCpuUsage
+        expr: rate(vm_cpu_seconds_total{mode="user"}[5m]) > 0  # Always triggers
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          description: "CPU usage exceeds 0% over the last 5 minutes"
+
+      # Low Disk Space on VM
+      - alert: LowDiskSpace
+        expr: vm_disk_free_bytes / vm_disk_total_bytes * 100 < 0  # Always triggers
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          description: "Disk space is below 0% free"
+
+      # High Disk I/O on VM
+      - alert: HighDiskIO
+        expr: rate(vm_disk_written_bytes_total[5m]) > 0  # Always triggers
+        for: 1m
         labels:
           severity: medium
         annotations:
-          description: "Memory usage"
+          description: "Disk write rate is higher than 0 bytes per second"
+
+      # VM is down (Up Status)
+      - alert: VMDown
+        expr: up{job="vm"} == 0  # Always triggers if the VM is down
+        labels:
+          severity: critical
+        annotations:
+          description: "The VM is down (up == 0)"
+
+      # High Network Traffic on VM
+      - alert: HighNetworkTraffic
+        expr: rate(vm_network_receive_bytes_total[5m]) > 0  # Always triggers
+        for: 1m
+        labels:
+          severity: medium
+        annotations:
+          description: "VM is receiving network traffic (greater than 0 bytes per second)"
+
+      # VM Host Load High
+      - alert: HighVMHostLoad
+        expr: rate(vm_cpu_seconds_total{mode="system"}[5m]) + rate(vm_cpu_seconds_total{mode="user"}[5m]) > 0  # Always triggers
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          description: "CPU load on VM host is higher than 0%"
+
+      # Memory Swapping on VM
+      - alert: MemorySwapping
+        expr: vm_memory_swap_in_bytes > 0  # Always triggers
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          description: "VM is swapping memory (swap in rate greater than 0 bytes per second)"
+
+      # VM CPU Load on Multiple Cores
+      - alert: HighCpuLoadMultipleCores
+        expr: avg(rate(vm_cpu_seconds_total{mode="user"}[5m])) by (instance) > 0  # Always triggers
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          description: "High CPU load across multiple cores"
+
+      # High Latency on VM (Network Latency)
+      - alert: HighNetworkLatency
+        expr: rate(vm_network_latency_seconds_total[5m]) > 0  # Always triggers
+        for: 1m
+        labels:
+          severity: medium
+        annotations:
+          description: "Network latency is above 0 seconds on VM"
 
       - alert: UpStatus
         expr: up
