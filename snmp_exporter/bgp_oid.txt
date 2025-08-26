@@ -1,0 +1,214 @@
+cisco_device:
+    walk:
+    - 1.3.6.1.2.1.15.3.1
+    - 1.3.6.1.2.1.47.1.1.1.1.7
+    - 1.3.6.1.4.1.9.9.109.1.1.1.1.7
+    - 1.3.6.1.4.1.9.9.109.1.1.1.1.8
+    - 1.3.6.1.4.1.9.9.117.1.1.2.1.2
+    - 1.3.6.1.4.1.9.9.221.1.1.1.1.2
+    - 1.3.6.1.4.1.9.9.221.1.1.1.1.3
+    - 1.3.6.1.4.1.9.9.221.1.1.1.1.7
+    - 1.3.6.1.4.1.9.9.221.1.1.1.1.8
+    - 1.3.6.1.4.1.9.9.249.1.1.1
+    - 1.3.6.1.4.1.9.9.25.1.1.1.2
+    - 1.3.6.1.4.1.9.9.48.1.1.1.1
+    - 1.3.6.1.4.1.9.9.48.1.1.1.2
+    - 1.3.6.1.4.1.9.9.48.1.1.1.5
+    - 1.3.6.1.4.1.9.9.48.1.1.1.6
+    - 1.3.6.1.4.1.9.9.91.1.1.1
+    get:
+    - 1.3.6.1.2.1.15.4.0
+    metrics:
+    - name: bgpPeerIdentifier
+      oid: 1.3.6.1.2.1.15.3.1.1
+      type: InetAddressIPv4
+      help: The BGP Identifier of this entry's BGP peer. - 1.3.6.1.2.1.15.3.1.1
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerState
+      oid: 1.3.6.1.2.1.15.3.1.2
+      type: gauge
+      help: The BGP peer connection state. - 1.3.6.1.2.1.15.3.1.2
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+      enum_values:
+        1: idle
+        2: connect
+        3: active
+        4: opensent
+        5: openconfirm
+        6: established
+    - name: bgpPeerAdminStatus
+      oid: 1.3.6.1.2.1.15.3.1.3
+      type: gauge
+      help: The desired state of the BGP connection - 1.3.6.1.2.1.15.3.1.3
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+      enum_values:
+        1: stop
+        2: start
+    - name: bgpPeerNegotiatedVersion
+      oid: 1.3.6.1.2.1.15.3.1.4
+      type: gauge
+      help: The negotiated version of BGP running between the two peers. - 1.3.6.1.2.1.15.3.1.4
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerLocalAddr
+      oid: 1.3.6.1.2.1.15.3.1.5
+      type: InetAddressIPv4
+      help: The local IP address of this entry's BGP connection. - 1.3.6.1.2.1.15.3.1.5
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerLocalPort
+      oid: 1.3.6.1.2.1.15.3.1.6
+      type: gauge
+      help: The local port for the TCP connection between the BGP peers. - 1.3.6.1.2.1.15.3.1.6
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerRemoteAddr
+      oid: 1.3.6.1.2.1.15.3.1.7
+      type: InetAddressIPv4
+      help: The remote IP address of this entry's BGP peer. - 1.3.6.1.2.1.15.3.1.7
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerRemotePort
+      oid: 1.3.6.1.2.1.15.3.1.8
+      type: gauge
+      help: The remote port for the TCP connection between the BGP peers - 1.3.6.1.2.1.15.3.1.8
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerRemoteAs
+      oid: 1.3.6.1.2.1.15.3.1.9
+      type: gauge
+      help: The remote autonomous system number. - 1.3.6.1.2.1.15.3.1.9
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerInUpdates
+      oid: 1.3.6.1.2.1.15.3.1.10
+      type: counter
+      help: The number of BGP UPDATE messages received on this connection - 1.3.6.1.2.1.15.3.1.10
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerOutUpdates
+      oid: 1.3.6.1.2.1.15.3.1.11
+      type: counter
+      help: The number of BGP UPDATE messages transmitted on this connection - 1.3.6.1.2.1.15.3.1.11
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerInTotalMessages
+      oid: 1.3.6.1.2.1.15.3.1.12
+      type: counter
+      help: The total number of messages received from the remote peer on this connection
+        - 1.3.6.1.2.1.15.3.1.12
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerOutTotalMessages
+      oid: 1.3.6.1.2.1.15.3.1.13
+      type: counter
+      help: The total number of messages transmitted to the remote peer on this connection
+        - 1.3.6.1.2.1.15.3.1.13
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerLastError
+      oid: 1.3.6.1.2.1.15.3.1.14
+      type: OctetString
+      help: The last error code and subcode seen by this peer on this connection -
+        1.3.6.1.2.1.15.3.1.14
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerFsmEstablishedTransitions
+      oid: 1.3.6.1.2.1.15.3.1.15
+      type: counter
+      help: The total number of times the BGP FSM transitioned into the established
+        state. - 1.3.6.1.2.1.15.3.1.15
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerFsmEstablishedTime
+      oid: 1.3.6.1.2.1.15.3.1.16
+      type: gauge
+      help: This timer indicates how long (in seconds) this peer has been in the Established
+        state or how long since this peer was last in the Established state - 1.3.6.1.2.1.15.3.1.16
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerConnectRetryInterval
+      oid: 1.3.6.1.2.1.15.3.1.17
+      type: gauge
+      help: Time interval in seconds for the ConnectRetry timer - 1.3.6.1.2.1.15.3.1.17
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerHoldTime
+      oid: 1.3.6.1.2.1.15.3.1.18
+      type: gauge
+      help: Time interval in seconds for the Hold Timer established with the peer
+        - 1.3.6.1.2.1.15.3.1.18
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerKeepAlive
+      oid: 1.3.6.1.2.1.15.3.1.19
+      type: gauge
+      help: Time interval in seconds for the KeepAlive timer established with the
+        peer - 1.3.6.1.2.1.15.3.1.19
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerHoldTimeConfigured
+      oid: 1.3.6.1.2.1.15.3.1.20
+      type: gauge
+      help: Time interval in seconds for the Hold Time configured for this BGP speaker
+        with this peer - 1.3.6.1.2.1.15.3.1.20
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerKeepAliveConfigured
+      oid: 1.3.6.1.2.1.15.3.1.21
+      type: gauge
+      help: Time interval in seconds for the KeepAlive timer configured for this BGP
+        speaker with this peer - 1.3.6.1.2.1.15.3.1.21
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerMinASOriginationInterval
+      oid: 1.3.6.1.2.1.15.3.1.22
+      type: gauge
+      help: Time interval in seconds for the MinASOriginationInterval timer - 1.3.6.1.2.1.15.3.1.22
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerMinRouteAdvertisementInterval
+      oid: 1.3.6.1.2.1.15.3.1.23
+      type: gauge
+      help: Time interval in seconds for the MinRouteAdvertisementInterval timer -
+        1.3.6.1.2.1.15.3.1.23
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpPeerInUpdateElapsedTime
+      oid: 1.3.6.1.2.1.15.3.1.24
+      type: gauge
+      help: Elapsed time in seconds since the last BGP UPDATE message was received
+        from the peer - 1.3.6.1.2.1.15.3.1.24
+      indexes:
+      - labelname: bgpPeerRemoteAddr
+        type: InetAddressIPv4
+    - name: bgpIdentifier
+      oid: 1.3.6.1.2.1.15.4
+      type: InetAddressIPv4
+      help: The BGP Identifier of local system. - 1.3.6.1.2.1.15.4
