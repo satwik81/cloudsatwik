@@ -1,176 +1,108 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-# Data source configuration (Multiple vmselects)
-vmselects:
-  - url: "http://vmselect-instance-1-url/api/v1/query"
-    query: 'your_query_1_here'
-  - url: "http://vmselect-instance-2-url/api/v1/query"
-    query: 'your_query_2_here'
-  - url: "http://vmselect-instance-3-url/api/v1/query"
-    query: 'your_query_3_here'
-=======
-# Configuration file with rules, datasources, and export options
->>>>>>> bcf29cec80e2cb6f37ccd768f8fcc63748557fcb
+datasource:
+  name: victoria
+  url: http://localhost:8481/select/0/prometheus/api/v1/query
+  
 
-rules:
-  - name: "cpu_utilization"
-    description: "CPU utilization of the VM"
-    query: "100 - avg(rate(vm_cpu_seconds_total{mode='idle'}[5m])) by (instance) * 100"
-    threshold: 90
-    condition: ">"
-    datasource:
-      name: "vmselect-instance-1"
-      url: "http://localhost:8080/api/v1/query"
-    export:
-      datastore: "mysql"
-      mysql:
-        host: "localhost"
-        database: "metrics_database"
-        user: "root"
-        password: "password"
-      action: "export"
-
-  - name: "memory_usage"
-    description: "Memory usage of the VM"
-    query: "(vm_memory_usage_bytes / vm_memory_total_bytes) * 100"
-    threshold: 85
-    condition: ">"
-    datasource:
-      name: "vmselect-instance-2"
-      url: "http://localhost:8080/api/v1/query"
-    export:
-      datastore: "file"
-      file:
-        path: "memory_usage_export.json"
-      action: "export"
-
-  - name: "disk_usage"
-    description: "Disk usage of the VM"
-    query: "avg(rate(vm_disk_io_time_seconds_total{device='sda'}[5m])) by (instance)"
-    threshold: 75
-    condition: ">"
-    datasource:
-      name: "vmselect-instance-1"
-      url: "http://localhost:8080/api/v1/query"
-    export:
-      datastore: "mysql"
-      mysql:
-        host: "localhost"
-        database: "metrics_database"
-        user: "root"
-        password: "password"
-      action: "export"
-
-  - name: "pvc_full"
-    description: "Persistent Volume Claim Usage"
-    query: "vm_kubernetes_pvc_usage_bytes{job='kubelet'} / vm_kubernetes_pvc_capacity_bytes{job='kubelet'} * 100"
-    threshold: 90
-    condition: ">"
-    datasource:
-      name: "vmselect-instance-2"
-      url: "http://localhost:8080/api/v1/query"
-    export:
-      datastore: "file"
-      file:
-        path: "pvc_usage_export.json"
-      action: "export"
-
-<<<<<<< HEAD
-# Export configuration
 export:
-  datastore: "mysql"  # Can be 'mysql', 'postgres', or 'file'
-  mysql:
-    host: "localhost"
-    database: "your_database"
-    user: "your_username"
-    password: "your_password"
-  file:
-    path: "exported_metrics.json"  # Path to store data as JSON file
-=======
-# Configuration file with rules, datasources, and export options
+  datastore: victoriametrics
+  push_url: http://localhost:8888/insert/0/prometheus/api/v1/import/prometheus
 
-rules:
-  - name: "cpu_utilization"
-    description: "CPU utilization of the VM"
-    query: "100 - avg(rate(vm_cpu_seconds_total{mode='idle'}[5m])) by (instance) * 100"
-    threshold: 90
-    condition: ">"
-    datasource:
-      name: "vmselect-instance-1"
-      url: "http://localhost:8080/api/v1/query"
-    export:
-      datastore: "mysql"
-      mysql:
-        host: "localhost"
-        database: "metrics_database"
-        user: "root"
-        password: "password"
-      action: "export"
+groups:
+  - name: vm_metrics_group
+    rules:
+      # High Memory Usage on VM
+      - alert: HighMemoryUsage
+        expr: vm_memory_usage_bytes / vm_memory_total_bytes * 100 > 0  # Always triggers
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          description: "Memory usage exceeds 0% of the total memory"
 
-  - name: "memory_usage"
-    description: "Memory usage of the VM"
-    query: "(vm_memory_usage_bytes / vm_memory_total_bytes) * 100"
-    threshold: 85
-    condition: ">"
-    datasource:
-      name: "vmselect-instance-2"
-      url: "http://localhost:8080/api/v1/query"
-    export:
-      datastore: "file"
-      file:
-        path: "memory_usage_export.json"
-      action: "export"
+      # High CPU Usage on VM
+      - alert: HighCpuUsage
+        expr: rate(vm_cpu_seconds_total{mode="user"}[5m]) > 0  # Always triggers
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          description: "CPU usage exceeds 0% over the last 5 minutes"
 
-  - name: "disk_usage"
-    description: "Disk usage of the VM"
-    query: "avg(rate(vm_disk_io_time_seconds_total{device='sda'}[5m])) by (instance)"
-    threshold: 75
-    condition: ">"
-    datasource:
-      name: "vmselect-instance-1"
-      url: "http://localhost:8080/api/v1/query"
-    export:
-      datastore: "mysql"
-      mysql:
-        host: "localhost"
-        database: "metrics_database"
-        user: "root"
-        password: "password"
-      action: "export"
+      # Low Disk Space on VM
+      - alert: LowDiskSpace
+        expr: vm_disk_free_bytes / vm_disk_total_bytes * 100 < 0  # Always triggers
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          description: "Disk space is below 0% free"
 
-  - name: "pvc_full"
-    description: "Persistent Volume Claim Usage"
-    query: "vm_kubernetes_pvc_usage_bytes{job='kubelet'} / vm_kubernetes_pvc_capacity_bytes{job='kubelet'} * 100"
-    threshold: 90
-    condition: ">"
-    datasource:
-      name: "vmselect-instance-2"
-      url: "http://localhost:8080/api/v1/query"
-    export:
-      datastore: "file"
-      file:
-        path: "pvc_usage_export.json"
-      action: "export"
+      # High Disk I/O on VM
+      - alert: HighDiskIO
+        expr: rate(vm_disk_written_bytes_total[5m]) > 0  # Always triggers
+        for: 1m
+        labels:
+          severity: medium
+        annotations:
+          description: "Disk write rate is higher than 0 bytes per second"
 
-=======
->>>>>>> bcf29cec80e2cb6f37ccd768f8fcc63748557fcb
-  - name: "network_traffic"
-    description: "Network traffic of the VM"
-    query: "sum(rate(vm_network_receive_bytes_total[5m])) by (instance)"
-    threshold: 5000000
-    condition: ">"
-    datasource:
-      name: "vmselect-instance-1"
-      url: "http://localhost:8080/api/v1/query"
-    export:
-      datastore: "mysql"
-      mysql:
-        host: "localhost"
-        database: "metrics_database"
-        user: "root"
-        password: "password"
-      action: "export"
-<<<<<<< HEAD
->>>>>>> 04b41fa... updated files
-=======
->>>>>>> bcf29cec80e2cb6f37ccd768f8fcc63748557fcb
+      # VM is down (Up Status)
+      - alert: VMDown
+        expr: up{job="vm"} == 0  # Always triggers if the VM is down
+        labels:
+          severity: critical
+        annotations:
+          description: "The VM is down (up == 0)"
+
+      # High Network Traffic on VM
+      - alert: HighNetworkTraffic
+        expr: rate(vm_network_receive_bytes_total[5m]) > 0  # Always triggers
+        for: 1m
+        labels:
+          severity: medium
+        annotations:
+          description: "VM is receiving network traffic (greater than 0 bytes per second)"
+
+      # VM Host Load High
+      - alert: HighVMHostLoad
+        expr: rate(vm_cpu_seconds_total{mode="system"}[5m]) + rate(vm_cpu_seconds_total{mode="user"}[5m]) > 0  # Always triggers
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          description: "CPU load on VM host is higher than 0%"
+
+      # Memory Swapping on VM
+      - alert: MemorySwapping
+        expr: vm_memory_swap_in_bytes > 0  # Always triggers
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          description: "VM is swapping memory (swap in rate greater than 0 bytes per second)"
+
+      # VM CPU Load on Multiple Cores
+      - alert: HighCpuLoadMultipleCores
+        expr: avg(rate(vm_cpu_seconds_total{mode="user"}[5m])) by (instance) > 0  # Always triggers
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          description: "High CPU load across multiple cores"
+
+      # High Latency on VM (Network Latency)
+      - alert: HighNetworkLatency
+        expr: rate(vm_network_latency_seconds_total[5m]) > 0  # Always triggers
+        for: 1m
+        labels:
+          severity: medium
+        annotations:
+          description: "Network latency is above 0 seconds on VM"
+
+      - alert: UpStatus
+        expr: up
+        labels:
+          severity: info
+        annotations:
+          description: "Service up"
+

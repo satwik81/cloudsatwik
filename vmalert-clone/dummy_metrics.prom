@@ -1,22 +1,54 @@
-# TYPE vm_node_cpu_seconds_total counter
-vm_node_cpu_seconds_total{mode="user", cpu="0", instance="node1", job="node-exporter"} 12345.67
-vm_node_cpu_seconds_total{mode="system", cpu="0", instance="node1", job="node-exporter"} 4567.89
-vm_node_cpu_seconds_total{mode="idle", cpu="0", instance="node1", job="node-exporter"} 78901.23
+# HELP http_requests_total A random counter metric.
+# TYPE http_requests_total counter
+http_requests_total{method="post",status="500"} 654
+http_requests_total{method="get",status="200"} 1027
 
-# TYPE vm_node_memory_MemFree_bytes gauge
-vm_node_memory_MemFree_bytes{instance="node1", job="node-exporter"} 1.572864e+09
+# HELP cpu_usage_percentage A random gauge metric.
+# TYPE cpu_usage_percentage gauge
+cpu_usage_percentage{host="server1",cpu="0"} 85.3
+cpu_usage_percentage{host="server1",cpu="1"} 62.1
+cpu_usage_percentage{host="server2",cpu="0"} 50.3
 
-# TYPE vm_http_requests_total counter
-vm_http_requests_total{code="200", method="GET", handler="/api/v1/query", job="vmselect"} 23980
-vm_http_requests_total{code="500", method="POST", handler="/api/v1/import", job="vminsert"} 12
+# HELP disk_usage_bytes A random gauge metric.
+# TYPE disk_usage_bytes gauge
+disk_usage_bytes{device="/dev/sda1",mount_point="/"} 102476800
+disk_usage_bytes{device="/dev/sdb1",mount_point="/mnt/data"} 204856576
 
-# TYPE vm_http_request_duration_seconds histogram
-vm_http_request_duration_seconds_bucket{le="0.1", method="GET", handler="/", job="vmselect"} 1240
-vm_http_request_duration_seconds_bucket{le="0.5", method="GET", handler="/", job="vmselect"} 5312
-vm_http_request_duration_seconds_bucket{le="1", method="GET", handler="/", job="vmselect"} 8302
-vm_http_request_duration_seconds_bucket{le="+Inf", method="GET", handler="/", job="vmselect"} 10234
-vm_http_request_duration_seconds_sum{method="GET", handler="/", job="vmselect"} 1434.78
-vm_http_request_duration_seconds_count{method="GET", handler="/", job="vmselect"} 10234
+# HELP temperature A random gauge metric.
+# TYPE temperature gauge
+temperature{sensor="sensor1",location="office"} 22.5
+temperature{sensor="sensor2",location="server-room"} 18.0
+temperature{sensor="sensor3",location="warehouse"} 25.1
 
-# TYPE vm_disk_io_time_seconds_total counter
-vm_disk_io_time_seconds_total{device="sda", instance="node1", job="node-exporter"} 345.6
+# HELP request_duration_seconds A random histogram metric.
+# TYPE request_duration_seconds histogram
+request_duration_seconds_bucket{le="0.1"} 240
+request_duration_seconds_bucket{le="0.2"} 400
+request_duration_seconds_bucket{le="0.5"} 550
+request_duration_seconds_bucket{le="1.0"} 590
+request_duration_seconds_bucket{le="2.5"} 600
+request_duration_seconds_bucket{le="5.0"} 600
+request_duration_seconds_bucket{le="10.0"} 600
+request_duration_seconds_count 600
+request_duration_seconds_sum 123.45
+
+# HELP api_request_duration_seconds A random summary metric.
+# TYPE api_request_duration_seconds summary
+api_request_duration_seconds{quantile="0.5"} 0.3
+api_request_duration_seconds{quantile="0.9"} 0.7
+api_request_duration_seconds{quantile="0.99"} 1.2
+api_request_duration_seconds_sum 100.5
+api_request_duration_seconds_count 200
+
+# HELP dummy_metric A random gauge metric.
+# TYPE dummy_metric gauge
+dummy_metric{type="simple",region="us-west",environment="prod"} 42
+dummy_metric{type="complex",region="eu-central",environment="staging"} 99
+dummy_metric{type="simple",region="us-east",environment="prod"} 27
+
+# HELP random_metric A random gauge metric.
+# TYPE random_metric gauge
+random_metric{label="test1"} 23.5
+random_metric{label="test2"} 54.8
+random_metric{label="test3"} 17.2
+random_metric{label="test4"} 89.4
