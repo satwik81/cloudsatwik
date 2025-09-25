@@ -1,0 +1,6 @@
+helm
+kubernetes
+ceph
+grafana
+mariadb
+
