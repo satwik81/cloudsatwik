@@ -3,4 +3,5 @@ kubernetes
 ceph
 grafana
 mariadb
-
+docker
+git
