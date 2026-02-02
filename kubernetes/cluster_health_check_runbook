@@ -1,0 +1,21 @@
+|| Layer || What to Check || Command || Healthy State || Action if Not Healthy ||
+| Cluster API | API server availability | `kubectl cluster-info` | API endpoints reachable | Check control-plane nodes & API server logs |
+| API Health | API health endpoints | `kubectl get --raw='/healthz'` | ok | Restart kube-apiserver |
+| Nodes | Node readiness | `kubectl get nodes` | All nodes = Ready | Check node status & kubelet |
+| Node Conditions | Memory / Disk / PID pressure | `kubectl describe node <node>` | All pressures = False | Free resources or cordon node |
+| Node Resources | CPU & memory usage | `kubectl top nodes` | < 80% usage | Scale nodes or workloads |
+| Pods | Pod status (all namespaces) | `kubectl get pods -A` | All pods Running/Completed | Investigate failing pods |
+| Pod Failures | Non-running pods | `kubectl get pods -A | grep -v Running` | Empty output | Describe & check logs |
+| Control Plane | kube-system components | `kubectl get pods -n kube-system` | All Running | Restart failed components |
+| etcd | etcd endpoint health | `etcdctl endpoint health` | Healthy | Immediate escalation |
+| DNS | CoreDNS pods | `kubectl get pods -n kube-system -l k8s-app=kube-dns` | Running | Restart CoreDNS |
+| DNS Test | Service name resolution | `nslookup kubernetes.default` | Resolves IP | Check CoreDNS logs |
+| Networking | CNI pods | `kubectl get pods -n kube-system | grep cni` | Running | Restart CNI |
+| Storage | Persistent Volumes | `kubectl get pv` | Available/Bound | Check storage backend |
+| Storage | Persistent Volume Claims | `kubectl get pvc -A` | Bound | Fix storage class |
+| Deployments | Deployment health | `kubectl get deploy -A` | Ready = Desired | Check rollout |
+| StatefulSets | Stateful workload health | `kubectl get sts -A` | Ready replicas match | Inspect pod ordering |
+| DaemonSets | Node-level services | `kubectl get ds -A` | Desired = Ready | Check node selectors |
+| Events | Cluster events | `kubectl get events -A --sort-by=.metadata.creationTimestamp` | No repeated errors | Fix root cause |
+| Security | Certificate signing requests | `kubectl get csr` | Approved | Approve or rotate certs |
+| Access | RBAC validation | `kubectl auth can-i get pods -A` | yes | Fix RBAC rules |
