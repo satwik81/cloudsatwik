@@ -1,0 +1,407 @@
+Harbor POC & Production Deployment Guide
+
+1. Introduction
+
+Harbor is an open-source container image registry that secures artifacts with policies and role-based access control, scans images for vulnerabilities, and signs images as trusted.
+
+This document covers:
+
+Harbor Proof of Concept (POC)
+
+Architecture overview
+
+POC deployment steps
+
+Production-grade deployment
+
+Security, TLS, and authentication
+
+Backup, DR, and upgrades
+
+Operational best practices
+
+
+
+---
+
+2. Harbor Architecture Overview
+
+Core Components
+
+Harbor Core: API & UI
+
+Registry: Docker distribution registry
+
+Database (PostgreSQL): Metadata storage
+
+Redis: Job queue and caching
+
+Job Service: Replication, scanning, GC jobs
+
+Trivy: Vulnerability scanning
+
+Nginx: Reverse proxy / ingress
+
+ChartMuseum (optional): Helm charts
+
+
+High-Level Flow
+
+1. Docker/OCI client pushes image
+
+
+2. Nginx terminates TLS
+
+
+3. Harbor core authenticates & authorizes
+
+
+4. Registry stores layers
+
+
+5. Metadata written to DB
+
+
+6. Trivy scans image asynchronously
+
+
+
+
+---
+
+3. Harbor POC
+
+3.1 POC Objectives
+
+Validate image push/pull
+
+Validate TLS setup
+
+Test vulnerability scanning
+
+Verify RBAC and projects
+
+Test basic replication
+
+
+3.2 POC Infrastructure
+
+Single VM or small K8s cluster
+
+2–4 CPU, 8 GB RAM
+
+Local or NFS storage
+
+Self-signed or internal CA certificate
+
+
+3.3 POC Deployment Options
+
+Docker Compose (recommended for fast POC)
+
+Kubernetes (Helm)
+
+
+
+---
+
+4. Harbor POC – Docker Compose Deployment
+
+4.1 Prerequisites
+
+Docker & Docker Compose
+
+OpenSSL
+
+DNS entry for Harbor hostname
+
+
+4.2 Generate TLS Certificates
+
+Create CA
+
+Create server cert for harbor.example.com
+
+Place certs under /data/cert
+
+
+4.3 Harbor Configuration
+
+Edit harbor.yml:
+
+hostname
+
+https certificate paths
+
+admin password
+
+database password
+
+data volume
+
+
+4.4 Install Harbor
+
+Run ./install.sh
+
+Verify containers are running
+
+
+4.5 Validation
+
+Docker login
+
+Push & pull test image
+
+Verify scan results
+
+
+
+---
+
+5. Harbor POC – Kubernetes Deployment
+
+5.1 Prerequisites
+
+Kubernetes cluster
+
+Ingress controller
+
+Persistent StorageClass
+
+Helm
+
+
+5.2 Install Using Helm
+
+Add Harbor Helm repo
+
+Configure values.yaml
+
+Enable Trivy
+
+Configure ingress
+
+
+5.3 Validation
+
+Ingress access
+
+TLS verification
+
+Image push/pull
+
+
+
+---
+
+6. Production Deployment – Design Considerations
+
+6.1 High Availability
+
+Multiple Harbor core replicas
+
+External PostgreSQL (HA)
+
+External Redis (Sentinel / Cluster)
+
+Load balancer or ingress
+
+
+6.2 Storage
+
+Object storage (S3 / GCS / Azure Blob) recommended
+
+Avoid local disk for PROD
+
+
+6.3 Network & DNS
+
+Stable FQDN
+
+Internal + external access (if needed)
+
+Firewall rules for registry ports
+
+
+
+---
+
+7. Production Deployment – Kubernetes (Recommended)
+
+7.1 Architecture
+
+Harbor deployed via Helm
+
+External DB & Redis
+
+Object storage backend
+
+TLS via cert-manager or enterprise CA
+
+
+7.2 Production values.yaml Highlights
+
+expose.type: ingress
+
+externalURL
+
+persistence.imageChartStorage
+
+trivy.enabled: true
+
+replicaCount for core, jobservice
+
+
+7.3 TLS Setup
+
+cert-manager with ClusterIssuer
+
+Or enterprise-issued certificates
+
+
+7.4 Authentication
+
+LDAP / Active Directory integration
+
+OIDC (optional)
+
+
+
+---
+
+8. Security Best Practices
+
+Enforce HTTPS only
+
+Enable vulnerability scanning
+
+Use robot accounts for CI/CD
+
+Enable content trust (Cosign/Notary v2)
+
+Restrict anonymous access
+
+NetworkPolicies in Kubernetes
+
+
+
+---
+
+9. CI/CD Integration
+
+GitLab / Jenkins
+
+Create robot account
+
+Store credentials as secrets
+
+Login → Build → Push → Scan
+
+
+Image Promotion Strategy
+
+DEV → QA → PROD projects
+
+Use replication policies
+
+
+
+---
+
+10. Backup & Disaster Recovery
+
+What to Backup
+
+Database
+
+Registry storage
+
+Harbor configuration
+
+TLS certificates
+
+
+Backup Strategy
+
+Daily DB backups
+
+Object storage versioning
+
+Periodic restore testing
+
+
+
+---
+
+11. Monitoring & Logging
+
+Metrics
+
+Prometheus integration
+
+Harbor metrics endpoint
+
+
+Logs
+
+Centralized logging (ELK / Loki / Vector)
+
+
+Alerts
+
+Disk usage
+
+DB connectivity
+
+Scan failures
+
+
+
+---
+
+12. Upgrades & Maintenance
+
+Review Harbor release notes
+
+Backup before upgrade
+
+Helm upgrade strategy
+
+Zero-downtime considerations
+
+
+
+---
+
+13. Common Issues & Troubleshooting
+
+Docker login TLS errors
+
+Invalid repository name
+
+Scan job failures
+
+Registry storage permission issues
+
+
+
+---
+
+14. POC vs PROD Summary
+
+Area	POC	Production
+
+Deployment	Docker Compose	Kubernetes + Helm
+TLS	Self-signed	Enterprise / cert-manager
+Storage	Local	Object Storage
+HA	No	Yes
+Auth	Local users	LDAP / OIDC
+
+
+
+---
+
+15. Conclusion
+
+Harbor POC helps validate functionality quickly, while production deployment requires strong focus on HA, security, storage, and operational excellence. Following this guide ensures a scalable and secure Harbor registry suitable for enterprise workloads.
