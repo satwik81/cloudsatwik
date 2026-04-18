@@ -32,3 +32,66 @@ creata deployment of vllm which we can use to run the model and use it.
 curl the request to vllm via api with the path and giving a query so that we can get a response from the model.
 
 Next steps will be the openwebui to interact with the model with the UI.
+
+### Deployment 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open-webui
+  namespace: open-webui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: open-webui
+  template:
+    metadata:
+      labels:
+        app: open-webui
+    spec:
+      containers:
+        - name: open-webui
+          image: ghcr.io/open-webui/open-webui:main
+          ports:
+            - containerPort: 8080
+          env:
+            - name: OPENAI_API_BASE_URL
+              value: "http://<service-name>.<namespace>.svc.cluster.local:<port>/v1"
+            - name: OPENAI_API_KEY
+              value: "dummy"          # Required field, but can be fake if your model doesn't auth
+            - name: WEBUI_AUTH
+              value: "false"          # Set to true for production
+          volumeMounts:
+            - name: webui-data
+              mountPath: /app/backend/data
+      volumes:
+        - name: webui-data
+          persistentVolumeClaim:
+             claimName: open-webui-pvc              # Replace with PVC for persistence
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: open-webui
+  namespace: open-webui
+spec:
+  selector:
+    app: open-webui
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: ClusterIP                    # Change to LoadBalancer or use Ingress for external access
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: open-webui-pvc
+  namespace: open-webui
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  # storageClassName: standard   # Uncomment and set if your cluster needs a specific StorageClass
