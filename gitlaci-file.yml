@@ -1,0 +1,91 @@
+# ============================================================
+# GitLab CI Pipeline: Resize Multiple PVCs in a Range
+# ============================================================
+# Trigger via: CI/CD > Pipelines > Run Pipeline
+#
+# Runtime variables (add when triggering):
+#   PVC_PREFIX    - Prefix of the PVC name    (e.g. datadir-myapp)
+#   INDEX_START   - Start index (inclusive)   (e.g. 0)
+#   INDEX_END     - End index (inclusive)     (e.g. 6)
+#   NEW_PVC_SIZE  - New size for each PVC     (e.g. 50Gi)
+#   K8S_NAMESPACE - Kubernetes namespace      (e.g. production)
+#
+#   This will patch: datadir-myapp-0, datadir-myapp-1 ... datadir-myapp-6
+#
+# Pre-set in Settings > CI/CD > Variables:
+#   KUBECONFIG_B64 - base64-encoded kubeconfig
+# ============================================================
+
+variables:
+  PVC_PREFIX:
+    value: ""
+    description: "PVC name prefix (e.g. datadir-myapp → patches datadir-myapp-0, datadir-myapp-1, ...)"
+  INDEX_START:
+    value: "0"
+    description: "Start index (inclusive)"
+  INDEX_END:
+    value: ""
+    description: "End index (inclusive)"
+  NEW_PVC_SIZE:
+    value: ""
+    description: "New size for each PVC (e.g. 50Gi)"
+  K8S_NAMESPACE:
+    value: ""
+    description: "Kubernetes namespace where the PVCs live (e.g. production)"
+
+stages:
+  - resize-pvc
+
+resize-pvc:
+  stage: resize-pvc
+  image: bitnami/kubectl:latest
+  script:
+    - |
+      mkdir -p /root/.kube
+      echo "$KUBECONFIG_B64" | base64 -d > /root/.kube/config
+      chmod 600 /root/.kube/config
+
+      echo "============================================"
+      echo "  PVC Resize — Range Loop"
+      echo "  Prefix    : $PVC_PREFIX"
+      echo "  Range     : $INDEX_START to $INDEX_END"
+      echo "  New Size  : $NEW_PVC_SIZE"
+      echo "  Namespace : $K8S_NAMESPACE"
+      echo "============================================"
+      echo ""
+
+      FAILED=""
+
+      for i in $(seq "$INDEX_START" "$INDEX_END"); do
+        PVC_NAME="${PVC_PREFIX}-${i}"
+        echo "---> Patching $PVC_NAME ..."
+        kubectl patch pvc "$PVC_NAME" \
+          -n "$K8S_NAMESPACE" \
+          -p "{\"spec\":{\"resources\":{\"requests\":{\"storage\":\"${NEW_PVC_SIZE}\"}}}}"
+
+        if [ $? -ne 0 ]; then
+          echo "  [FAILED] $PVC_NAME"
+          FAILED="${FAILED} $PVC_NAME"
+        else
+          echo "  [OK]     $PVC_NAME"
+        fi
+        echo ""
+      done
+
+      echo "============================================"
+      echo "  Summary"
+      echo "============================================"
+      kubectl get pvc -n "$K8S_NAMESPACE" \
+        --no-headers \
+        | grep "^${PVC_PREFIX}-"
+
+      if [ -n "$FAILED" ]; then
+        echo ""
+        echo "WARNING: The following PVCs failed to patch:$FAILED"
+        exit 1
+      fi
+
+      echo ""
+      echo "All PVCs resized to $NEW_PVC_SIZE successfully."
+  rules:
+    - when: always
